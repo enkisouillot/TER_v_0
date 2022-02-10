@@ -1,0 +1,8 @@
+[package]
+name = "TER_v_0"
+version = "0.1"
+lean_version = "leanprover-community/lean:3.39.1"
+path = "src"
+
+[dependencies]
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "a86277a2d64d51b5d46874b4fd453c1392350b0c"}
