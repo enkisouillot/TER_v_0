@@ -35,8 +35,13 @@ def multiplication (z : ℂ) : (ℝ × ℝ →L[ℝ] ℝ × ℝ) := by {
   { refine ⟨_,_,_⟩,
     { exact realify (λ w, z * w) },
     { intros, simp [realify], split, ring, ring },
-    { sorry}},
-  { sorry }
+    { intros, simp [realify], split; ring } },
+  { simp, 
+    apply continuous_def.mpr,
+    intros s hs,
+    refine is_open_iff_open_ball_subset.mpr _,
+    sorry
+  }
 }
 
 variables {Ω : set ℂ} {f : Ω → ℂ} {z₀ : Ω}
