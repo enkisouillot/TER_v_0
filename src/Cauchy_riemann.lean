@@ -11,6 +11,7 @@ import data.complex.basic -- pour travailler sur ℂ
 import analysis.complex.basic -- pour travailler sur ℂ
 import analysis.calculus.deriv -- pour utiliser la dérivation déjà créée de façon générale
 import topology.basic
+import topology.metric_space.lipschitz
 
 
 open complex
@@ -37,13 +38,29 @@ def multiplication (z : ℂ) : (ℝ × ℝ →L[ℝ] ℝ × ℝ) := by {
     { intros, simp [realify], split, ring, ring },
     { intros, simp [realify], split; ring } },
   { simp, 
-    apply continuous_def.mpr,
-    intros s hs,
-    refine is_open_iff_open_ball_subset.mpr _,
-    sorry
-  }
+    let K : nnreal := nnnorm z,
+    suffices : lipschitz_with K (realify (has_mul.mul z)),
+      exact lipschitz_with.continuous this,
+
+    intros z₁ z₂,
+
+    calc edist (realify (has_mul.mul z) z₁) (realify (has_mul.mul z) z₂) ≤ sorry : sorry
+    ... ≤ K edist z₁ z₂ : sorry
+  },
 }
 
-variables {Ω : set ℂ} {f : Ω → ℂ} {z₀ : Ω}
+variables {Ω : set ℂ} {f : ℂ → ℂ} {z : ℂ}
 
--- lemma cauchy_riemann (hf : f is_C_deriv) :=
+-- lemma cauchy_riemann (hf : f is_C_deriv) := ∀ z ∈ Ω, has_fderiv_at (realify f) (multiplication (f' z)) z
+
+lemma cauchy_riemann (f' : ℂ) (hf : has_deriv_at f f' z) : has_fderiv_at (realify f) (multiplication f') (equiv_real_prod.to_fun z) :=
+begin
+  sorry
+end
+
+
+-- cauchy riemann dans un domaine ouvert
+
+-- lemme de schwarz non injectif a partir de ce qui est fait
+
+-- attaquer la suite !
