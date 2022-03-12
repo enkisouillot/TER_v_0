@@ -51,8 +51,6 @@ def multiplication (z : ℂ) : (ℝ × ℝ →L[ℝ] ℝ × ℝ) := by {
 
 variables {Ω : set ℂ} {f : ℂ → ℂ} {z : ℂ}
 
--- lemma cauchy_riemann (hf : f is_C_deriv) := ∀ z ∈ Ω, has_fderiv_at (realify f) (multiplication (f' z)) z
-
 lemma cauchy_riemann (f' : ℂ) (hf : has_deriv_at f f' z) : has_fderiv_at (realify f) (multiplication f') (equiv_real_prod.to_fun z) :=
 begin
   sorry
