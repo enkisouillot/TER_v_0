@@ -56,23 +56,43 @@ continuous_linear_map.restrict_scalars ℝ (multiply f')
   Voici l'énoncé LEAN :
 -/
 
+example {f : ℂ → ℂ} {z : ℂ} (f' : ℂ) (hf : has_deriv_at f f' z) :
+  has_fderiv_at (realify f) (C_to_R2 ∘L real_multiply f' ∘L R2_to_C) (C_to_R2 z) :=
+begin
+  -- On donne la preuve que R2_to_C est l'inverse à gauche de C_to_R2
+  have zz : function.left_inverse R2_to_C C_to_R2 := complex.equiv_real_prod.left_inv,
+  -- on applique la règle de dérivation en chaîne
+  apply has_fderiv_at.comp,
+  -- la preuve que C_to_R2 soit différentiable de différentielle elle-même est :
+  { apply C_to_R2.has_fderiv_at},
+  -- on applique encore une fois la règle de la chaîne
+  {apply has_fderiv_at.comp,
+  -- on demande à LEAN de comparer l'hypohtèse hf restreinte à ℝ avec le goal
+  -- LEAN donne alors à prouver les différences
+  { convert has_fderiv_at.restrict_scalars ℝ hf.has_fderiv_at,
+    -- on simplifie le goal : on développe real_multiply, puis multiply
+    { simp [real_multiply, multiply, continuous_linear_map.restrict_scalars],
+      -- deux applications sont égales si elles sont égales en tout point
+      apply linear_map.ext, intro x, simp, apply mul_comm
+    }, -- il reste maintenant à appliquer l'hypothèse zz que nous avions montrée
+    { apply zz},},
+  -- et voici la preuve que R2_to_C est différentiable de différentielle elle-même
+  {apply R2_to_C.has_fderiv_at, }, },
+  -- refine C_to_R2.has_fderiv_at.comp _ (has_fderiv_at.comp _ _ R2_to_C.has_fderiv_at),
+end
+
+/-
+Il reste alors à rendre cette preuve plus courte avec une écriture condensée
+-/
+
 lemma cauchy_riemann_step_1 {f : ℂ → ℂ} {z : ℂ} (f' : ℂ) (hf : has_deriv_at f f' z) : -- les variables et les hypothèses
   has_fderiv_at (realify f) (C_to_R2 ∘L real_multiply f' ∘L R2_to_C) (C_to_R2 z) := -- l'énoncé
 begin
   refine C_to_R2.has_fderiv_at.comp _ (has_fderiv_at.comp _ _ R2_to_C.has_fderiv_at), -- pourquoi 2 _ dans la parenthèse ? Quel rôle du . dans les propriétés ?
-  have zz : function.left_inverse R2_to_C C_to_R2 := complex.equiv_real_prod.left_inv, rw zz z,
+  have zz : function.left_inverse R2_to_C C_to_R2 := complex.equiv_real_prod.left_inv, 
+  rw zz z,
   convert has_fderiv_at.restrict_scalars ℝ hf.has_fderiv_at,
   simp [real_multiply, multiply, continuous_linear_map.restrict_scalars],
-  apply linear_map.ext, intro z, simp, apply mul_comm
+  apply linear_map.ext, intro z, simp, apply mul_comm,
 end
 
-example {f : ℂ → ℂ} {z : ℂ} (f' : ℂ) (hf : has_deriv_at f f' z) :
-  has_fderiv_at (realify f) (C_to_R2 ∘L real_multiply f' ∘L R2_to_C) (C_to_R2 z) :=
-begin
-  apply has_fderiv_at.comp,
-  { apply C_to_R2.has_fderiv_at},
-  {apply has_fderiv_at.comp,
-  { sorry},
-  {apply R2_to_C.has_fderiv_at, }, },
-  -- refine C_to_R2.has_fderiv_at.comp _ (has_fderiv_at.comp _ _ R2_to_C.has_fderiv_at),
-end
