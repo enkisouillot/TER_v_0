@@ -10,7 +10,7 @@ Tout d'abord, voici les applications linéaires (et continues) naturelles entre 
 def C_to_R2 : ℂ →L[ℝ] ℝ × ℝ := complex.equiv_real_prodₗ -- l'application de ℂ ≃ ℝ²
 def R2_to_C : ℝ × ℝ →L[ℝ] ℂ := complex.equiv_real_prodₗ.symm -- sa réciproque
 
-/-
+/- 
 Puis, la propriété qui transforme une fonction complexe en sa réalification dans ℝ²
 -/
 
@@ -88,7 +88,7 @@ Il reste alors à rendre cette preuve plus courte avec une écriture condensée
 lemma cauchy_riemann_step_1 {f : ℂ → ℂ} {z : ℂ} (f' : ℂ) (hf : has_deriv_at f f' z) : -- les variables et les hypothèses
   has_fderiv_at (realify f) (C_to_R2 ∘L real_multiply f' ∘L R2_to_C) (C_to_R2 z) := -- l'énoncé
 begin
-  refine C_to_R2.has_fderiv_at.comp _ (has_fderiv_at.comp _ _ R2_to_C.has_fderiv_at), -- pourquoi 2 _ dans la parenthèse ? Quel rôle du . dans les propriétés ?
+  refine C_to_R2.has_fderiv_at.comp _ (has_fderiv_at.comp _ _ R2_to_C.has_fderiv_at),
   have zz : function.left_inverse R2_to_C C_to_R2 := complex.equiv_real_prod.left_inv, 
   rw zz z,
   convert has_fderiv_at.restrict_scalars ℝ hf.has_fderiv_at,
@@ -96,3 +96,16 @@ begin
   apply linear_map.ext, intro z, simp, apply mul_comm,
 end
 
+-- je teste l'ancienne version de la multiplication, avec la nouvelle définition de realify
+
+def mul_exe (z : ℂ) : (ℝ × ℝ →L[ℝ] ℝ × ℝ) := by {
+  refine ⟨_,_⟩,
+  {
+    refine ⟨_,_,_⟩,
+    { exact realify (λ w, w * z) },
+    { intros, simp [realify], ring_nf},
+    { intros r x, simp[realify], sorry },
+  }, 
+  -- have : complex.equiv_real_prodₗ_apply z,
+  simp, sorry
+}
