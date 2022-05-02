@@ -100,12 +100,26 @@ end
 
 def mul_exe (z : ℂ) : (ℝ × ℝ →L[ℝ] ℝ × ℝ) := by {
   refine ⟨_,_⟩,
-  {
-    refine ⟨_,_,_⟩,
+  { refine ⟨_,_,_⟩,
     { exact realify (λ w, w * z) },
     { intros, simp [realify], ring_nf},
-    { intros r x, simp[realify], sorry },
-  }, 
-  -- have : complex.equiv_real_prodₗ_apply z,
-  simp, sorry
+    { intros r x, simp[realify, C_to_R2], split ; ring },
+  },
+  simp [realify], apply continuous.comp,
+  { exact C_to_R2.continuous },
+  apply continuous.comp,
+  { exact continuous_mul_right z },
+  { exact R2_to_C.continuous },
 }
+
+#check fin_two_arrow_equiv 
+#check matrix.to_lin'
+
+def mulmatrix (a b : ℝ) : matrix (fin 2) (fin 2) ℝ :=
+![![a,  b],
+  ![-b, a]]
+
+lemma toto (f' : ℂ) : matrix.to_lin' (mulmatrix (f'.1 ) (f'.2)) = C_to_R2 ∘L real_multiply f' ∘L R2_to_C :=
+begin
+  sorry
+end
