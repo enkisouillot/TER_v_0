@@ -119,6 +119,7 @@ def mulmatrix (a b : ℝ) : matrix (fin 2) (fin 2) ℝ :=
 ![![a,  b],
   ![-b, a]]
 
+
 lemma toto (f' : ℂ) : matrix.to_lin' (mulmatrix (f'.1 ) (f'.2)) = C_to_R2 ∘L real_multiply f' ∘L R2_to_C :=
 begin
   sorry
