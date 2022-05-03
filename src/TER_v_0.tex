@@ -1,0 +1,830 @@
+\documentclass[a4paper, 11pt, twoside]{report}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb, amsthm, amsfonts}
+\usepackage[french]{babel}
+\usepackage{enumitem}
+
+\usepackage{listings}
+ 
+\usepackage[mathcal]{euler}
+\usepackage{dsfont}
+
+\usepackage{pifont}
+\usepackage{gfsartemisia-euler}
+\usepackage[dvipsnames, svgnames, usenames]{xcolor}
+\usepackage{graphicx}
+
+\definecolor{tacticcolor}{rgb}{0.7, 0.1, 0.1}   % red
+\definecolor{keywordcolor}{rgb}{0.0, 0.1, 0.6}    % blue
+\definecolor{commentcolor}{rgb}{0.4, 0.4, 0.4}   % grey
+\definecolor{symbolcolor}{rgb}{0.0, 0.1, 0.6}    % blue
+\definecolor{sortcolor}{rgb}{0.1, 0.5, 0.1}      % green
+\definecolor{attributecolor}{rgb}{0.8, 0.1, 1} % pink
+\definecolor{backcolour}{rgb}{0.95,0.95,0.95}
+%{0.95,0.95,0.92}
+
+\def\lstlanguagefiles{lstlean.tex}
+% set default language
+\lstset{language=lean,
+numbers = left, stepnumber=1, numberstyle=\tiny, numbersep=10pt }
+
+\usepackage{tikz}
+\usetikzlibrary{matrix,decorations.pathreplacing,calc,fit,backgrounds, arrows, patterns}
+\usepackage{xpatch}
+\usepackage{realboxes}
+
+\usetikzlibrary{shapes, babel}
+\usepackage{varwidth}
+
+\usepackage{titlesec}
+\usepackage{stmaryrd}
+\usepackage{fancyhdr}
+\usepackage{geometry}
+\usepackage{eso-pic}
+\usepackage[many]{tcolorbox}
+\tcbuselibrary{skins,breakable, xparse}
+\usepackage[tikz]{bclogo}
+\usepackage{nameref}
+\usepackage[linktoc = all, bookmarks = true, frenchlinks = true, linkbordercolor = Cerulean]{hyperref}
+
+
+\usepackage{etoolbox}
+\patchcmd{\chapter}{\thispagestyle{plain}}{\thispagestyle{fancy}}{}{}
+
+\usepackage{titletoc}
+\titlecontents{chapter}
+              [0pc]
+              {\addvspace{.2pc}\filright}
+              {$\leadsto$~\chaptername~ \thecontentslabel ~--- 
+               }
+              {}
+              {\titlerule*[1pc]{.}\contentspage}  % That is, without page number
+              [\addvspace{.2pc}]
+              
+\titlecontents{section}[4pc]{\addvspace{.2pc}\filright}{\thecontentslabel ~--- }{}{\titlerule*[1pc]{.}\contentspage}[\addvspace{.2pc}]
+\titlecontents{subsection}[7pc]{\addvspace{.2pc}\filright}{\thecontentslabel ~--- }{}{\titlerule*[1pc]{.}\contentspage}[\addvspace{.2pc}]
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\newcommand{\blap}[1]{\vbox to 0pt{#1\vss}}
+\newcommand\AtUpperLeftCorner[3]{%
+  \put(\LenToUnit{#1},\LenToUnit{\dimexpr\paperheight-#2}){\blap{#3}}%
+}
+\newcommand\AtUpperRightCorner[3]{%
+  \put(\LenToUnit{\dimexpr\paperwidth-#1},\LenToUnit{\dimexpr\paperheight-#2}){\blap{\llap{#3}}}%
+}
+
+\geometry{hmargin=1.5cm,vmargin=2.4cm}
+
+\renewcommand\bcStyleSousTitre[1]{\hfill\textsl{#1}}
+
+\newenvironment{rem}{\begin{bclogo}[noborder = true, logo = \bcicosaedre, sousTitre = Remarque, marge=8, couleurBarre = Gray!70]{}}{\begin{center}
+		\begin{tikzpicture}
+			\draw[very thin, Gray!70] (-8,0) -- (-0.2,0) -- (-0.1,0.2) -- (0.1,-0.2) -- (0.2,0) -- (8,0) ; 
+		\end{tikzpicture}
+	\end{center}
+\end{bclogo}}
+
+\newenvironment{sepdown}{\centerline{\begin{tikzpicture}
+	\foreach \k in {-1.8,-1.4,...,2.2}{
+	\draw (\k,0) node{\Large $\ast$};}
+\end{tikzpicture}}\footnotesize}{\normalfont}
+
+\renewcommand\thechapter{\Roman{chapter}}
+
+\renewcommand\thesection{\arabic{section} }
+
+\renewcommand\thesubsection{\qquad\arabic{section}.\Alph{subsection} --- }
+
+\newcommand{\sectionformat}[1]{%
+    \begin{tikzpicture}[baseline=(title.base)]
+        \node (title) {\thesection\hspace{1em}#1};
+        \draw[double] (title.west) |- (title.south) (title.north) -| (title.east);
+    \end{tikzpicture}
+}
+
+\titleformat{\section}{\normalfont\Large\bfseries\filcenter}{}{0em}{\sectionformat}
+
+\titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection}{0em}{}
+
+\AtEndDocument{\label{lastpage}}
+
+\pagestyle{fancy}
+\fancyhead[CE]{\leftmark}
+\fancyhead[CO]{\rightmark}
+\fancyhead[RE,LO]{\thepage/\textcolor{RubineRed}{\pageref{lastpage}}}
+\fancyfoot{}
+\fancyhead[RO,LE]{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[RO,RE]{\textcolor{Gray!30}{Enki SOUILLOT}}
+
+\setenumerate[1]{label = $\rhd$ \bfseries\arabic*),leftmargin=1.8cm}
+          
+\newtcolorbox{code}[1]{enhanced,breakable,
+	colframe = gray!10,
+          %toggle left and right,
+          sharp corners,
+          boxrule=0pt,top=1mm,bottom=1mm,left=1mm,right=1mm,
+          leftrule=1cm,
+          interior style={},
+          frame style={},
+%overlay={%
+%\begin{tcbclipframe}
+%		\coordinate (ftopleft) at (frame.north west) ;
+%		\coordinate (fbotleft) at (frame.south west) ;
+%\tcbifoddpage{\coordinate (X) at ([xshift=-5mm]frame.east);}
+%                         {\coordinate (X) at ([xshift=5mm]frame.west);}
+%            \foreach \i in {0,0.1, 0.15,0.2,0.3,0.35,0.4,0.5,0.6,0.65,0.7,0.85,0.9,1}{
+%            	\draw ($(ftopleft)+(\i,0)$) -- ($(fbotleft)+(\i,0)$) ;}
+%            \end{tcbclipframe}}, 
+            attach boxed title to top center={xshift=1cm,yshift*=1mm-\tcboxedtitleheight}, varwidth boxed title*=-3cm,
+boxed title style={frame code={
+            \path[fill=gray!30!black]
+              ([yshift=-1mm,xshift=-1mm]frame.north west)
+                arc[start angle=0,end angle=180,radius=1mm]
+              ([yshift=-1mm,xshift=1mm]frame.north east)
+                arc[start angle=180,end angle=0,radius=1mm];
+            \path[left color=gray!60!black,right color=gray!60!black,
+              middle color=gray!80!black]
+              ([xshift=-2mm]frame.north west) -- ([xshift=2mm]frame.north east)
+              [rounded corners=1mm]-- ([xshift=1mm,yshift=-1mm]frame.north east)
+              -- (frame.south east) -- (frame.south west)
+              -- ([xshift=-1mm,yshift=-1mm]frame.north west)
+              [sharp corners]-- cycle;
+            },interior engine=empty,
+          }, title = Code lean : #1, fonttitle = \large\bfseries, drop shadow southeast}
+          
+\newtcolorbox{tactic}{
+  enhanced jigsaw,colback=white,colframe=green!40,coltitle=green!40,
+  fonttitle=\large\bfseries\sffamily,
+  sharp corners,
+  detach title,
+  leftrule=24mm, sidebyside,
+  underlay unbroken and first={\node[below,text=black,anchor=east]
+  at ([xshift=-1pt]interior.base west) {\large\sffamily  \textbf{Tactique}};},
+  breakable,pad at break=1mm,
+  code={\ifdefempty{\tcbtitletext}{}{\tcbset{before upper={\tcbtitle\par\medskip}}}},
+}
+
+\DeclareMathOperator{\Mat}{Mat}
+\DeclareMathOperator{\card}{Card}
+\DeclareMathOperator{\Id}{Id}
+\DeclareMathOperator{\Vect}{Vect}
+\DeclareMathOperator{\Arg}{Arg}
+\DeclareMathOperator{\Log}{Log}
+\DeclareMathOperator{\Ind}{Ind}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\dist}{dist}
+\DeclareMathOperator{\indep}{\perp \!\!\! \perp}
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\pgcd}{pgcd}
+\DeclareMathOperator{\ppcm}{ppcm}
+\DeclareMathOperator{\Gal}{Gal}
+
+\newcommand*\diff{\mathop{}\!\mathrm{d}}
+\newcommand\intL[3]{\int_{#1}#2\,\diff #3}
+
+\newcommand\Z{\mathbb{Z}}
+\newcommand\N{\mathbb{N}}
+\newcommand\Q{\mathbb{Q}}
+\newcommand\R{\mathbb{R}}
+\newcommand\C{\mathbb{C}}
+\newcommand\K{\mathbb{K}}
+\newcommand\Pb{\mathbb{P}}
+\newcommand{\p}{\mathbb{P}}
+\newcommand\E{\mathbb{E}} 
+\newcommand\Rb{\overline{\R}}
+
+\newcommand{\U}{\mathcal{U}}
+\newcommand{\Y}{\mathcal{Y}}
+\newcommand\h{\mathcal{H}}
+
+\newcommand{\Rd}{\R^d}
+
+\newcommand\Lp[1]{\mathcal{L}^{#1}}
+
+\newcommand\prsm{\rtimes_\varphi}
+
+\newcommand\lp[1]{\mathrm{L}^{#1}}
+\newcommand\normep[2]{\|#1\|_{#2}}
+
+\newcommand{\tr}{\,^t}
+
+\newcommand{\soul}[1]{$\underline{\text{#1}}$}
+
+\newcommand{\ie}{{\ttfamily\itshape i.e.}}
+
+\newcommand\ind{\mathds{1}}
+\newcommand\indi[1]{\mathds{1}_{\{#1\}}}
+
+\newcommand\inv[1]{#1^{-1}}
+
+\newcommand\convps{\overset{p.s.}{\underset{n\to\infty}{\longrightarrow}}}
+\newcommand\convpb{\overset{p}{\underset{n\to\infty}{\longrightarrow}}}
+\newcommand\conv[1]{\underset{n\to\infty}{\overset{#1}{\longrightarrow}}}
+
+\newcommand\val[1]{\textbf{\textcolor{\mycolor}{#1}}}
+
+\newcommand\fonc[5]{\left\{\begin{array}{ccccc}
+	#1 & : & #2 & \rightarrow & #3 \\ & & #4 & \mapsto & #5 
+\end{array}\right.}
+\newcommand\func[5]{\left\{\begin{array}{ccccc}
+	#1 & : & #2 & \longrightarrow & #3 \\ & & #4 & \longmapsto & #5 
+\end{array}\right.}
+
+\newcommand{\ev}[1]{\begin{bmatrix}
+	#1
+\end{bmatrix}}
+
+\newcommand{\ps}[1]{\left\langle #1 \right\rangle}
+
+\newcommand{\limc}[1]{\lim_{#1\to+\infty}\!\!\!\!\, ^\uparrow\,}
+
+\newcommand{\LEAN}{L$\exists\forall$N }
+
+\begin{document}
+
+\begin{titlepage}
+	\begin{tikzpicture}[overlay,remember picture]
+	\pgfmathsetmacro{\k}{3}
+	\coordinate(ptopleft) at ($(current page.north west)$);			\foreach\i in {0,.1,.2,.3,.5,.6,.9,1.1,1.2,1.3,1.5,1.6,1.8,1.9,2,2.1,2.3,2.4,2.5,2.6,2.8,2.9,3,3.1,
+	3.3,3.4,3.6,3.7,3.8,3.9,4.1,4.2,4.3,4.4,4.5,4.7,4.8,4.9,5.1,5.2,5.5,5.6,5.7,5.8,6,6.1,6.2,6.5,6.6,6.7,6.9,7,
+	7.1,7.2,{1/3*\paperwidth}}
+		\draw[black!50, thick]($(ptopleft)+(\i,0)$)--+(0,-\paperheight);
+		\begin{scope}[shift = {($(ptopleft) + ({1/6*\paperwidth+\k},{-\k})$)}, rotate = 90, fill = white, draw = white, scale = 2]
+			\pgfmathsetmacro{\unite}{1.5}
+	\pgfmathsetmacro{\epaisseur}{0.15}
+	
+	% les rectangles verticaux
+	\filldraw (\epaisseur, \unite) rectangle ({-\epaisseur},{-\unite}) ;
+	\filldraw ({-15/9*\unite - \epaisseur}, \unite) rectangle ({-15/9*\unite + \epaisseur}, {-\unite}) ;
+	\filldraw ({-11/3*\unite - \epaisseur}, \unite) rectangle ({-11/3*\unite+\epaisseur},{-\unite}) ;
+	\filldraw ({-56/9*\unite-\epaisseur},\unite) rectangle ({-56/9*\unite+\epaisseur},{-\unite}) ;
+	
+	% les rectangles horizontaux
+	\filldraw ({-56/9*\unite+\epaisseur},{-\unite}) rectangle ({-11/3*\unite-\epaisseur},{-\unite+2*\epaisseur}) ;
+	\filldraw ({-89/18*\unite},{-\epaisseur}) rectangle ({-11/3*\unite+\epaisseur},{\epaisseur}) ;
+	\filldraw ({-89/18*\unite}, {\unite-2*\epaisseur}) rectangle ({-11/3*\unite+\epaisseur},\unite) ;
+	\filldraw ({-13/6*\unite}, {-\epaisseur}) rectangle ({-19/6*\unite},{\epaisseur}) ;
+	
+	% les diagonales
+	\pgfmathsetmacro{\d}{4}
+	\filldraw ({-\epaisseur},{-\unite}) -- ({-\epaisseur},{-\unite+3*\epaisseur}) -- ({-15/9*\unite + \epaisseur},\unite) -- ({-15/9*\unite+\epaisseur},{\unite-3*\epaisseur}) -- cycle ;
+	\filldraw ({-15/9*\unite-\epaisseur},\unite) -- ({-15/9*\unite-\epaisseur},{\unite-\d*\epaisseur}) -- ({-8/3*\unite},{-\unite}) -- ({-11/3*\unite + \epaisseur},{\unite-\d*\epaisseur}) -- ({-11/3*\unite + \epaisseur},\unite) -- ({-8/3*\unite},{-\unite+\d*\epaisseur}) -- cycle ;
+		\end{scope}
+		
+		\node[fill = white, anchor=north, very thick, right=-2mm, inner sep = 5mm]at($(ptopleft)+({1/12*\paperwidth},-0.9\paperheight)$){\large Université Grenoble Alpes --- M1 Mathématiques Générales --- Année Universitaire 2021-2022};
+\end{tikzpicture}
+
+\AddToShipoutPicture{
+        \AtUpperLeftCorner{8cm}{1.5cm}{\includegraphics[width=5cm]{Logo_UGA.png}}
+        \AtUpperRightCorner{1.5cm}{1.5cm}{\includegraphics[width=6cm]{Logo_IF}}}
+        
+        
+      	\vspace{7cm}
+		\hspace{6.5cm} \begin{minipage}{0.6\linewidth}
+			\scshape
+				
+			\centerline{\LARGE Travail d'études et de recherche}
+			
+			\vspace{1cm}			
+			
+			\textcolor{orange}{\HRule}
+			
+			\begin{center}
+				\Huge Assistant de preuves et formalisation
+			\end{center}
+			
+			\textcolor{orange}{\HRule}	
+			
+			\vspace{3.5cm}			
+			
+			\centerline{\LARGE Enki SOUILLOT}
+			
+			\vspace{0.5cm}			
+			
+			\centerline{\LARGE Encadré par Vincent BEFFARA}
+		\end{minipage}		      	  \end{titlepage}
+
+\newpage
+
+
+\ClearShipoutPicture
+
+
+\section{Introduction}
+
+Ce rapport a pour but de donner les bases de l'utilisation du langage de formalisation mathématique \LEAN, à l'aide d'exemples plus ou moins simples de niveau Master. 
+
+Mais tout d'abord, qu'est-ce que \LEAN ? \LEAN (ou plutôt le "\LEAN\, Theorem Prover" est un langage de formalisation des théorèmes et preuves mathématiques développé par \textit{Leonardo de Moura} au sein de \textit{Microsoft Research}.
+
+L'objectif de \LEAN est la vérification des preuves mathématiques, notamment via l'application pure des règles de logique élémentaires.
+
+Mais pourquoi vérifier informatiquement nos preuves, même lorsque celles-ci nous semblent justes de part en part ? Le raisonnement mathématique repose sur la rigueur et la logique, il ne laisse pas de place à l'approximatif. L'intuition du mathématicien lui donne les idées d'une preuve, mais rendre cette preuve rigoureuse est parfois un travail de longue haleine. \LEAN répond à ce problème puisque son objectif est de répondre à une simple question à chaque étape : "Ai-je le droite de faire ceci ?".
+
+L'application des règles de logique entre plusieurs énoncés, basés sur un système cohérent d'axiomes, permet à \LEAN de vérifier la véracité des preuves mais également de les rendre plus cohérente : l'ordre des arguments, la nécessité ou non de telle hypothèse, etc... 
+
+\LEAN est donc un outil à la résolution des problèmes mathématiques, mais il ne remplacera jamais l'esprit acéré du mathématicien devant son tableau noir.
+
+\medskip
+
+Depuis quelques années, la communauté \LEAN, constituée de chercheurs en mathématiques et de passionnés, œuvre dans le but de constitué une librairie suffisante pour que l'utilisation de \LEAN devienne accessible à tous niveaux.
+
+La librairie \verb|mathlib| rassemble un grand nombre de définitions, lemmes et théorèmes avec leurs preuves, sur des domaines très variés allant de la topologie à l'algèbre des modules passant par la théorie de la mesure. L'objectif est de formaliser les résultats "undergraduate", c'est-à-dire jusqu'au niveau Master principalement. 
+
+Toutes ces preuves existantes peuvent être utilisées directement dans les preuves que nous faisons, afin de ne pas avoir à re-démontrer certains résultats préliminaires.
+
+\bigskip
+
+Ce rapport présentera, dans un premier temps, l'utilisation basique du logiciel en prenant exemple sur des résultats simples, puis quelques résultats d'analyse complexe du premier semestre de Master, dont nous détailleront les preuves.
+
+\section{LEAN et ses tactiques}
+
+Le langage \LEAN a un grand intérêt lors de l'écriture des preuves. En effet, à chaque étape, \LEAN affiche le \textit{contexte local} et l'\textit{objectif}. 
+
+Le \textit{contexte locale} réuni toute les données existantes à l'instant T, que ce soit les variables introduites dans l'énoncé du théorème ou dans la preuve, mais aussi les hypothèses sur ces variables.
+L'\textit{objectif} est, au début, l'énoncé à prouver. À chaque ligne, celui-ci s'actualise afin de donner exactement les éléments qu'il reste à prouver. 
+
+Cette configuration permet de réflechir à la preuve directement sur le logiciel, mais aussi de comprendre plus facilement les erreurs que nous aurions pu faire.
+
+Pour résoudre un objectif, c'est-à-dire faire une preuve, il nous faudra utiliser des tactiques et des lemmes. Les tactiques sont des outils permettant le raisonnement mathématique pur, par exemple remplacer dans une équation une variable par une autre dont on a prouvé qu'elles sont égales. Les lemmes sont des énoncés que l'on a prouvé précédemment ou qui se trouvent dans la librairie. Nous y feront appel, en les adaptant au contexte local.
+
+La combinaison de ces deux éléments permet de réaliser les preuves, de la plus simple à la plus complexe. Parfois, pour résoudre un objectif complexe, nous serons amenés à créer des lemmes intermédiaires, ou encore à avoir plusieurs objectifs dans la même preuve.
+
+Un autre élément important se trouve dans la syntaxe des preuves. On trouvera toujours une virgule après une commande, elle est indispensable pour que \LEAN interprète la tactique.
+
+\subsection{Les tactiques de résolution --- exemple}
+
+Voici un énoncé simple que nous allons étudier dans un premier temps.
+
+\begin{code}{Inégalités de réels}
+\begin{lstlisting}
+example (a b c  : ℝ) (hc : 0 ≤ c) (hab : a ≤ b) : a*c ≤ b*c :=
+begin
+  rw ← sub_nonneg,
+  have h_fact : b*c - a*c = (b - a)*c,
+  { ring },
+  rw h_fact,
+  apply mul_nonneg,
+  { rw sub_nonneg,
+    exact hab },
+  { exact hc },
+end 
+\end{lstlisting}
+\end{code}
+
+À la première lecture, tout ceci doit vous sembler quelque peu incompréhensible. Prenons les choses une par une.
+
+Tout d'abord, la ligne 1 : c'est l'énoncé. Le mot clef \verb|example| annonce à \LEAN un énoncé que l'on ne souhaite pas garder en mémoire pour pouvoir le réutiliser, à l'instar de \verb|lemma| que nous verrons plus tard. 
+
+La syntaxe pour ce mot clef est la suivante : \verb|example (variables) (hypothèses) : résultat :=|. 
+
+Ici, on déclare 3 variables \verb|a, b, c| qui sont des réels, ou plutôt qui sont "de type" réel. On donne ensuite deux hypothèses :
+\begin{itemize}
+	\item Une appelée \verb|hc| qui dit que $0$ est plus petit que $c$ ;
+	\item l'autre, \verb|hab|, donne $a$ plus petit ou égal à $b$.
+\end{itemize}
+Enfin, on annonce le résultat que l'on souhaite prouver : $ac\leq bc$. Ce résultat est, a priori, très simple. Il va cependant nécessité quelques tactiques pour le prouver.
+
+La preuve du résultat se trouve après les symboles $:=$ et entre les mots \verb|begin| et \verb|end|. Si nous plaçons notre curseur juste après le \verb|begin|, voici ce que \LEAN affiche :
+
+\begin{lstlisting}
+1 goal
+a b c : ℝ
+hc: 0 ≤ c
+hab: a ≤ b
+⊢ a * c ≤ b * c
+\end{lstlisting}
+
+
+On observe sur les lignes 2,3 et 4 le \textit{contexte local} avec les variables et les hypothèses données dans l'énoncé, puis en ligne 5, après le symbole $\vdash$, l'\textit{objectif} en cours.
+
+Commençons maintenant la preuve. Pour cela nous aurons besoin de quelques lemmes existant déjà dans la librairie mathlib : 
+
+\begin{lstlisting}
+sub_nonneg : 0 ≤ b - a ↔ a ≤ b,
+mul_nonneg : (0 ≤ a → 0 ≤ b) → 0 ≤ a * b 
+\end{lstlisting}
+
+La première étape va être de transformer l'objectif $ac\leq bc$ en $0 \leq bc - ac$. Nous allons donc utiliser le lemme \verb|sub_nonneg| et la tactique \verb|rewrite|
+
+\begin{tactic}
+	\centerline{\bfseries Rewrite --- rw}
+	La tactique \verb|rw| réécrit l'objectif en cours à l'aide d'une égalité. On peut la traduire par "On remplace". 
+	\tcblower
+	Si l'objectif est \verb|a = c| et une hypothèse \verb|h : a = b|, alors écrire \verb|rw h| donne l'objectif \verb|b = c|.
+\end{tactic}
+
+La tactique \verb|rw| fonctionne également avec les équivalences : si $h : P \leftrightarrow Q$ est une hypothèse, alors \verb|rw h| transforme $P \rightarrow R$ en $Q \rightarrow R$.
+
+Une variante est nécessaire dans notre cas, puisque l'on veut réécrire l'implication inverse. Pour cela, il suffit d'ajouter $\leftarrow$ après le \verb|rw|. On écrit donc \verb|rw| $\leftarrow$ \verb|sub_nonneg|, et voici ce que \LEAN nous dit :
+\begin{lstlisting}
+a b c : ℝ
+hc : 0 ≤ c
+hab : a ≤ b
+⊢ 0 ≤ b * c - a * c
+\end{lstlisting}
+
+Passons à la ligne 4. Nous voulons maintenant factoriser le membre de droite de notre égalité. Pour cela, nous allons avoir recours à la tactique \verb|have| :
+
+\begin{tactic}
+	\centerline{\bfseries Have}
+	Elle a pour effet de créer une nouvelle hypothèse, sous condition d'en donner une preuve dans le contexte local.
+	
+	La syntaxe est la suivante :
+	
+	\verb|have 'nom' : 'hypothèse'|.
+	
+	\tcblower
+	
+	Écrire \verb|have h : a = b| donne deux objectifs :
+	\begin{itemize}
+		\item Prouver que \verb|a = b| avec le contexte local ;
+		\item l'objectif initial dont le contexte local est enrichi avec l'hypothèse \verb|h|.
+	\end{itemize}
+\end{tactic}
+
+Ici, on va donc créer l'hypothèse nommée \verb|h_fact| qui donne la factorisation : c'est la ligne 4.
+
+Il nous faut ensuite donner la preuve de cette factorisation. Bien heureusement, nous n'avons pas à reprendre toutes les mathématiques de base, il nous suffit d'utiliser le raccourcis \verb|ring|. Celui-ci va tout simplement résoudre les objectifs avec les règles de calculs propres aux anneaux (comme le nom l'indique), comme dans notre exemple. 
+
+On peut finalement réécrire cette nouvelle hypothèse dans l'objectif par un simple \verb|rw h_fact,|, et on obtient l'objectif suivant :
+
+\begin{lstlisting}
+⊢ 0 ≤ (b - a) * c
+\end{lstlisting}
+
+Nous avons maintenant quelque chose de la même forme que la conclusion du lemme \verb|mul_nonneg| et nous voudrions pouvoir revenir à ses arguments, "prendre la flèche dans l'autre sens". Pour cela, nous allons introduire la tactique \verb|apply|.
+
+\begin{tactic}
+	\centerline{\bfseries Apply}
+	
+	\verb|Apply| cherche une ressemblance entre l'objectif et la conclusion du lemme. Il change ensuite l'objectif en cours en demandant les arguments du lemme en question.
+	
+	\tcblower
+	Si on a \verb|lemme_1 : A → B| et un objectif de la forme $B$,
+	écrire \verb|apply lemme_1| change l'objectif par $A$.
+\end{tactic}
+
+Ainsi, appliquons le lemme \verb|mul_nonneg| à l'objectif, nous obtenons les objectifs suivants :
+
+\begin{lstlisting}
+2 goals
+
+abc: ℝ
+hc: 0 ≤ c
+hab: a ≤ b
+h_fact: b * c - a * c = (b - a) * c
+⊢ 0 ≤ b - a
+
+abc: ℝ
+hc: 0 ≤ c
+hab: a ≤ b
+h_fact: b * c - a * c = (b - a) * c
+⊢ 0 ≤ c
+\end{lstlisting}
+
+Concernant le premier objectif, celui-ci ressemble fortement à l'hypothèse \verb|hab|. Pour avoir une ressemblance exacte, il nous faut appliquer notre lemme \verb|sub_nonneg| avec la tactique \verb|rw| : en effet, ici on veut remplacer notre objectif $0\leq b-a$ par $a\leq b$. On peut ensuite conclure à l'aide de la tactique \verb|exact|
+
+\begin{tactic}
+	\centerline{\bfseries Exact}
+	
+	Comme son nom l'indique, cette tactique agit uniquement quand l'objectif est exactement le même qu'une hypothèse ou qu'un lemme connu. Elle permet de conclure la démonstration.
+	
+	\tcblower
+	
+	Si on a une hypothèse \verb|h : a = b| et que l'objectif est \verb|a = b|, alors \verb|exact h| permet de conclure.
+\end{tactic}
+
+Ici, on conclut donc le premier objectif. 
+
+Pour le second, c'est exactement l'hypothèse \verb|hc|, donc on conclut avec la tactique \verb|exact|.
+
+\medskip
+
+Nous avons donc réussi à prouver que multiplier par un nombre positif ne change pas le sens d'une inégalité. C'est évidemment un résultat très simple que nous n'aurons plus jamais besoin de démontrer, puisqu'il est dans la librairie sous le nom de \verb|mul_mono_nonneg|. 
+
+On peut d'ailleurs écrire comme seule démonstration : 
+
+\begin{lstlisting}
+exact mul_mono_nonneg hc hab,
+\end{lstlisting}
+
+Il s'agit du lemme correspondant que l'on applique aux hypothèses du contexte local.
+
+\medskip
+
+Il reste nombre d'autres tactiques que l'on peut utiliser, nous ne les énuméreront pas toutes ici. Voici simplement les quelques autres tactiques dont nous aurons besoin par la suite.
+
+\medskip
+
+Pour la première, \LEAN connait déjà nombre de choses en mathématiques, et pour faire appel à ces connaissances, on peut demander à \LEAN de simplifier l'objectif :
+\begin{tactic}
+	\centerline{\bfseries Simplify --- simp}
+	
+	\LEAN va simplifier les énoncés de l'objectif à l'aide des lemmes qu'il connait. On peut également lui demander de simplifier certaines définitions propres à notre code ou encore de s'aider des hypothèses.
+	
+	\tcblower
+	
+	Il existe plusieurs syntaxe pour \verb|simp| :
+	\begin{itemize}
+		\item \verb|simp| utilise certains lemmes de la librairie,
+		\item \verb|simp[blabla]| utilise certains lemmes et les hypothèses blabla qui lui sont données.
+	\end{itemize}
+\end{tactic}
+
+C'est une tactique bien utile pour simplifier les objectifs sans avoir à rechercher tous les lemmes correspondants dans la librairie.
+
+\subsection{Les tactiques de travail}
+
+Parlons maintenant d'une tactique plus complexe mais pourtant bien utile pour les preuves longues : \verb|refine|. Nous l'utiliseront à de nombreuses reprises dans la suite, prenons donc le temps de l'expliquer ici.
+
+\begin{tactic}
+	\centerline{\bfseries Refine}
+	
+	On utilise cette tactique pour séparer un objectif complexe en autant d'objectifs qu'il y a d'arguments. Il suffit d'indiquer autant de \verb|_| que d'arguments et chaque argument devient un objectif.
+	
+	\tcblower
+	
+	Par exemple, si on veut une application linéaire de $\R$ dans $\R$, c'est-à-dire un objectif $\R \to_l \R$, écrire \verb|refine ⟨_,_,_⟩| permet d'avoir 3 objectifs (3 \verb|_|) qui corresponde à donner l'application, prouver son additivité et prouver son homogénéité (cf plus loin).
+\end{tactic}
+
+Nous verrons l'utilité de cette tactique plus loin.
+
+\medskip
+
+Lorsque nous travaillons sur une preuve, qui n'est donc pas finie, \LEAN annonce à chaque ligne des erreurs liées à la fin de la preuve. Afin d'éviter cette surcharge d'informations, nous pouvons utiliser le mot magique \verb|sorry|. Lors de la recherche et de la rédaction d'une preuve, on va par habitude écrire \verb|sorry| à la fin, où sur chaque élément de preuve de sorte que \LEAN accepte notre lemme et que l'on puisse l'utiliser par la suite, sans avoir encore fini la preuve.
+
+\medskip
+
+Enfin, terminons par une tactique qui permet de chercher s'il existe un résultat semblable à l'objectif dans la librairie, qui permettrait de conclure : \verb|library_search|.
+
+
+
+
+
+
+
+
+\section{L'analyse complexe par LEAN}
+
+Afin de rendre les connaissances acquises via les tutoriels d'utilisation de \LEAN, nous allons coder les résultats et les preuves du cours d'analyse complexe de M1. En raison de la longueur du travail nécessaire pour une seule preuve, nous n'iront pas jusqu'au bout du cours.
+
+\subsection{Cadre}
+
+Tout d'abord, posons le cadre. Heureusement, la librairie mathlib possède déjà une version de $\C$. Les nombres complexes sont présentés comme des paires de réels, la partie réelle et la partie imaginaire. Autrement dit, le code \fbox{$z : \C$} signifie \fbox{$x\, y : \R, z = (x,y)$}. 
+
+Cette définition va nous être bien utile par la suite. Pour y faire appel dans notre fichier \LEAN, il nous suffit d'écrire 
+
+\begin{lstlisting}
+	import analysis.complex.basic 
+\end{lstlisting}
+
+
+Une des conséquences évidentes est donc que $\C$ est en bijection avec $\R\times \R$. Ceci est donné par la fonction \verb|complex.equiv_real_prod|. Par exemple, si $z:\C$, alors \verb|complex.equiv_real_prod z| est un élément de $\R\times \R$. En revanche, si $x : \R\times\R$, alors \verb|complex.equiv_real_prod.symm x| est un nombre complexe. En effet, \verb|complex.equiv_real_prod| est une fonction de $\C$ dans $\R\times\R$ qui est bijective, dont on peut donc prendre la réciproque via la commande \verb|.symm|
+
+Une autre propriété est que cette fonction qui lie $\C$ et $\R\times\R$ est linéaire continue. Pour cela on utilise la fonction \verb|complex.equiv_real_prod|$_l$ dont la linéarité et la continuité sont prouvées.
+
+\medskip
+
+Pour continuer, nous aurons besoin des fonctions holomorphes, qui sont en réalité des fonctions dérivables de $\C$. Il se trouve que la dérivation à été définie, tout comme la différentiabilité (qui sont fortement liée l'une à l'autre...) dans la librairie. Ces notions, comme toutes les autres dans la librairie, sont définis de la manière la plus générale possible, ce qui signifie que nous pouvons utiliser la dérivation dans $\C$ par la même commande que celle dans $\R$, ce qui est très pratique. 
+
+Afin d'utiliser ces définitions, importons le bon fichier :
+
+\begin{lstlisting}
+import analysis.calculus.deriv 
+\end{lstlisting}
+
+Pour finir, ajoutons le code
+
+\begin{lstlisting}
+noncomputable theory 
+\end{lstlisting}
+
+afin d'éviter la plupart des problèmes qui pourrait survenir.
+
+\subsection{Cauchy-Riemann, étape 1 --- énoncé}
+
+Commençons par ce premier résultat, les équations de Cauchy-Riemann. En revanche, nous n'allons pas pouvoir le prouver sous la forme la plus connue, c'est-à-dire par les dérivées partielles, puisque celles-ci n'existent pas directement dans la librairie. Nous allons passer par une version quelque peu différente. Voici le premier résultat à prouver.
+
+\begin{tcolorbox}[colback = red!10, colframe = red!80, title = Holomorphe $\Longrightarrow$ différentiable sur $\R^2$, fonttitle = \large\bfseries]
+	Soit $f : \C\to \C$ une fonction holomorphe ($\C-$dérivable) en $z\in\C$. Alors $f$, en tant qu'application de $\R^2$ dans $\R^2$ est différentiable en $z\in\R^2$ de différentielle la multiplication par $f'(z)$.
+\end{tcolorbox}
+
+La première étape est de réussir à écrire un énoncé accepté par \LEAN. On a ici 3 variables : la fonction $f$, le point $z$ et le point $f'(z)$ que l'on notera $f'$. On travaille ici en un unique point, il n'y a pas de nécessité de considérer la fonction dérivée $f':\C\to \C$. 
+
+On a ensuite une hypothèse de départ : $f$ est $\C-$dérivable en $z$ de dérivée $f'$ (encore une fois, $f'$ est un point qui est par définition la dérivée de $f$ en $z$). Le théorème qui dit que $f$ est $\C-$dérivable en un point porte le nom de \verb|has_deriv_at|. On peut donc commencer par écrire :
+
+\begin{lstlisting}
+	lemma cauchy_riemann_step_1 {f : ℂ → ℂ} {z : ℂ} (f' : ℂ) (hf : has_deriv_at f f' z) : 
+\end{lstlisting}
+	
+	Parlons maintenant de l'énoncé à prouver. On veut voir $f$ comme une fonction de $\R^2$. Pour cela, nous allons écrire \verb| realify f|, puis nous définirons la fonction \verb|realify| plus loin. Le théorème qui dit qu'une fonction est différentiable est \verb|has_fderiv_at|. On peut appeler \verb|multiply| la fonction de multiplication que nous définirons plus loin. On a alors :
+	
+\begin{lstlisting}
+	lemma cauchy_riemann_step_1 {f : ℂ → ℂ} {z : ℂ} (f' : ℂ) (hf : has_deriv_at f f' z) : 
+	
+	has_fderiv_at (realify f) (multiply f') (complex.equiv_real_prod z) :=	 
+\end{lstlisting}
+	
+	Sous réserve de définir \verb|realify| et \verb|multiply|, cet énoncé tient la route.
+	
+	On notera d'ailleurs la syntaxe de la commande \verb|lemma| : en premier le nom que l'on donne afin d'y faire référence plus tard. Ensuite, entre parenthèse ou accolades, les variables et les hypothèses, puis \verb|:|, l'énoncé et on termine par \verb|:=|.
+	
+	\subsection{Un premier essai...}
+	
+Nous avons tout d'abord défini \verb|realify f| comme étant la composition de $f$ avec les fonctions qui vont de $\C$ dans $\R^2$ et réciproquement. Avec la fonction $f$ en argument, nous obtenons le code suivant :
+
+\begin{lstlisting}
+def realify (f : ℂ → ℂ ) : (ℝ × ℝ → ℝ × ℝ) := equiv_real_prod.to_fun ∘ f ∘ equiv_real_prod.inv_fun
+\end{lstlisting}
+	
+On notera l'utilisation ici des attributs \verb|to_fun| et \verb|inv_fun| qui permettent l'utilisation d'un sens ou de l'autre d'une bijection.
+
+Une autre nouveauté dans cette ligne de code est la commande \verb|def|. Comme son nom l'indique, elle permet de définir un objet, notamment des fonctions. On écrit donc \verb|def| puis le nom de la fonction, on ajoute \verb|:| et on écrit le type de l'objet, ici une fonction de $\R^2$ dans $\R^2$. Enfin, après \verb|:=|, on donne la définition.
+
+\medskip
+
+Nous avons maintenant notre fonction qui transforme une fonction sur $\C$ en une fonction sur $\R^2$. Il nous faut maintenant notre multiplication. Nous allons la définir comme une application linéaire et continue de $\R^2$ dans $\R^2$, ce qui nous donne :
+
+\begin{lstlisting}
+	def multiply (z : ℂ) : (ℝ × ℝ →L[ℝ] ℝ × ℝ) := 
+\end{lstlisting}
+
+Notons que le caractère linéaire et continue est donné par la syntaxe $\rightarrow L[\R]$. Nous n'allons pas pouvoir ici juste dire qu'il s'agit de la multiplication, puisqu'il nous faudra aussi prouver la linéarité et la continuité. Pour observer tout ceci, nous allons utiliser \verb|refine|.
+	
+\begin{lstlisting}
+def multiply (z : ℂ) : (ℝ × ℝ →L[ℝ] ℝ × ℝ) := by {
+  refine ⟨_,_⟩, 
+\end{lstlisting}
+  
+  On a deux \verb|_|, donc deux choses à donner à \LEAN :
+  
+\begin{lstlisting}
+2 goals
+z: ℂ
+⊢ ℝ × ℝ →ₗ[ℝ] ℝ × ℝ
+z: ℂ
+⊢ auto_param (continuous ?m_1.to_fun) (name.mk_string "continuity'" (name.mk_string "interactive" (name.mk_string "tactic" name.anonymous)))
+\end{lstlisting}
+
+Premièrement, \LEAN attends une fonction $\R-$linéaire de $\R^2$ dans $\R^2$. Puis, le second objectif est la continuité de cette fonction (dit dans des termes bien complexes). 
+
+On utilise une nouvelle fois \verb|refine| pour avoir le détail du premier objectif :
+
+\begin{lstlisting}
+def multiply (z : ℂ) : (ℝ × ℝ →L[ℝ] ℝ × ℝ) := by {
+  refine ⟨_,_⟩,
+  	{ refine ⟨_,_,_⟩, 
+\end{lstlisting}
+  	
+L'utilisation des accolades permet de se concentrer sur un seul objectif à la fois. Voici ce que nous dit \LEAN :
+
+\begin{lstlisting}
+3 goals
+z: ℂ
+⊢ ℝ × ℝ → ℝ × ℝ
+z: ℂ
+⊢ ∀ (x y : ℝ × ℝ), ?m_1 (x + y) = ?m_1 x + ?m_1 y
+z: ℂ
+⊢ ∀ (r : ℝ) (x : ℝ × ℝ), ?m_1 (r • x) = ⇑(ring_hom.id ℝ) r • ?m_1 x
+\end{lstlisting}
+
+Voici donc ce qu'est une application linéaire : c'est la donnée d'une application, la preuve de son additivité et celle de son homogénéité.
+
+On donne donc l'application : il s'agit de la réalification de la multiplication dans $\C$ par $z$, puis les preuves qui sont assez élémentaires puisque \LEAN sait le faire :
+
+\begin{lstlisting}
+def multiply (z : ℂ) : (ℝ × ℝ →L[ℝ] ℝ × ℝ) := by {
+  refine ⟨_,_⟩,
+  	{ refine ⟨_,_,_⟩,
+		{ exact realify (λ w, z * w) },
+		{ intros, simp [realify], split; ring },
+		{ intros, simp [realify], split; ring } },
+\end{lstlisting}
+
+Il nous reste maintenant à prouver la continuité de cette application. Cela peut paraître élémentaire, mais essayons de le faire avec \LEAN. Tout d'abord, on utilise \verb|simp| afin de comprendre l'objectif, on obtient :
+
+\begin{lstlisting}
+1 goal
+z: ℂ
+⊢ continuous (realify (has_mul.mul z)) 
+\end{lstlisting}
+
+Ici, \verb|has_mul.mul| est le nom donné par \LEAN pour la fonction que nous avons défini juste avant. Afin de prouver la continuité, on va utiliser la caractérisation de Lipschitz, donnée par \verb|lipshitz_with|, et prouver que notre application est lipschitzienne avec une constante de Lipschitz $K = 2\|z\|$ . Pour cela, on utilise la commande \verb|suffices| qui traduit "il suffit de" afin d'amener un nouvel objectif qui permettras de conclure. Voici le code :
+
+\begin{lstlisting}
+	def multiplication (z : ℂ) : (ℝ × ℝ →L[ℝ] ℝ × ℝ) := by {
+  refine ⟨_,_⟩,
+  { refine ⟨_,_,_⟩,
+    { exact realify (λ w, z * w) },
+    { intros, simp [realify], split, ring, ring },
+    { intros, simp [realify], split; ring } },
+  { simp, 
+    suffices : lipschitz_with (nnnorm z * 2) (realify (has_mul.mul z)),
+\end{lstlisting}
+    
+    et le résultat donné par \LEAN :
+   
+\begin{lstlisting}
+2 goals
+z: ℂ
+this: lipschitz_with (∥z∥₊ * 2) (realify (has_mul.mul z))
+⊢ continuous (realify (has_mul.mul z))
+z: ℂ
+⊢ lipschitz_with (∥z∥₊ * 2) (realify (has_mul.mul z))
+\end{lstlisting}
+
+Il nous faut donc, dans un premier temps, prouver que savoir la fonction Lipschitzienne permet de conclure à sa continuité. Pour cela, on utilise un lemme de la librairie, \verb|lispchitz_with.continuous|, qui dit exactement ce qu'il nous faut. On écrit alors :
+
+\begin{lstlisting}
+def multiplication (z : ℂ) : (ℝ × ℝ →L[ℝ] ℝ × ℝ) := by {
+  refine ⟨_,_⟩,
+  { refine ⟨_,_,_⟩,
+    { exact realify (λ w, z * w) },
+    { intros, simp [realify], split, ring, ring },
+    { intros, simp [realify], split; ring } },
+  { simp, 
+    suffices : lipschitz_with (nnnorm z * 2) (realify (has_mul.mul z)),
+      exact lipschitz_with.continuous this, 
+\end{lstlisting}
+
+Il reste maintenant à prouver que notre fonction est Lipschitzienne. C'est malheureusement quelque chose qui n'est pas simple. Après de nombreuses recherches, voici le code nécessaire pour prouver cette caractérisation lipschitzienne :
+
+\begin{code}{La multiplication est lipschitzienne}
+\begin{lstlisting}
+def rabs : ℝ → ℝ := abs
+
+lemma l1 (z w : ℂ) : (realify (has_mul.mul z) (equiv_real_prod w)) = equiv_real_prod.to_fun (z * w) := rfl
+
+lemma l2 (z1 z2 : ℂ) : equiv_real_prod (z1 - z2) = equiv_real_prod z1 - equiv_real_prod z2 := by { refl }
+lemma l3 (z1 z2 : ℂ) : equiv_real_prod (z1 - z2) = equiv_real_prod.to_fun z1 - equiv_real_prod.to_fun z2 := by { refl }
+
+lemma l6 (z : ℂ) : nnnorm (equiv_real_prod z) ≤ nnnorm z := by {
+  rw prod.nnnorm_def, simp [nnnorm, norm], split,
+  apply abs_re_le_abs, apply abs_im_le_abs
+}
+
+lemma l7 (z : ℂ) : nnnorm z ≤ 2 * nnnorm (equiv_real_prod z) := by {
+  simp [nnnorm,norm], rw ← subtype.coe_le_coe, simp,
+  transitivity rabs z.re + rabs z.im,
+  exact complex.abs_le_abs_re_add_abs_im z,
+  rw two_mul, apply add_le_add, apply le_max_left, apply le_max_right,
+}
+
+lemma l5 {z xy : ℂ} : ∥equiv_real_prod (z * xy)∥₊ ≤ nnnorm z * 2 * ∥equiv_real_prod xy∥₊ :=
+begin
+  transitivity nnnorm (z * xy), apply l6,
+  simp_rw mul_assoc,
+  simp,
+  apply mul_le_mul le_rfl,
+  apply l7, apply zero_le, apply zero_le,
+end
+
+lemma l8 (z : ℂ) : lipschitz_with (nnnorm z * 2) (realify (has_mul.mul z)) :=
+begin
+  rw [lipschitz_with], intros x y,
+  set x' := equiv_real_prod.inv_fun x with h1,
+  set y' := equiv_real_prod.inv_fun y with h1,
+  have : x = equiv_real_prod x' := by { simp [x'] }, rw this, rw l1,
+  have : y = equiv_real_prod y' := by { simp [y'] }, rw this, rw l1,
+  rw [edist_eq_coe_nnnorm_sub,edist_eq_coe_nnnorm_sub,←l2,←l3],
+  rw ← mul_sub,
+  set xy := x' - y' with hxy, rw ←hxy,
+  rw ← ennreal.coe_mul,
+  apply ennreal.coe_le_coe.mpr,
+  exact l5
+end
+\end{lstlisting}
+\end{code}
+	
+Et ainsi, on peut conclure la définition de \verb|multiplication| par un simple \verb|exact l8 z|.
+	
+Pour cette preuve, il a nécessité un grand nombre de lemmes intermédiaires lors de la recherche. Il est possible de réduire grandement la rédaction de ces lemmes grâce aux raccourcis d'écriture de \LEAN.
+
+Nous ne l'avons pas fait ici car, en tentant la preuve de notre \verb|cauchy_riemann_step_1|, nous nous sommes aperçu que cette définition de multiplication n'est pas la plus simple à manipuler. Nous l'avons donc laisser de côté, ou plutôt, nous avons adapté nos énoncés.
+
+	\subsection{Les bons énoncés}
+	
+	Pour commencer et afin de simplifier l'utilisation, re-définissons les fonctions de $\C$ dans $\R^2$ :
+	
+\begin{lstlisting}
+	def C_to_R2 : ℂ →L[ℝ] ℝ × ℝ := complex.equiv_real_prodₗ -- l'application de ℂ dans ℝ²
+	def R2_to_C : ℝ × ℝ →L[ℝ] ℂ := complex.equiv_real_prodₗ.symm -- sa reciproque 
+\end{lstlisting}
+
+Ce sont les fonctions que nous avons vu depuis le début avec la particularité qu'elles sont directement fournies avec la preuve de leur continuité et de leur linéarité (la seule différence est le petit $_l$ après le nom). 
+
+\medskip
+
+Re-définissons maintenant le \verb|realify| avec ces fonctions. 
+
+\begin{lstlisting}
+	def realify (f : ℂ → ℂ) : ℝ × ℝ → ℝ × ℝ := C_to_R2 ∘ f ∘ R2_to_C  
+\end{lstlisting}
+
+Au final, nous avons donné la même définition à \verb|realify|, à la différence près des petites fonctions \verb|C_to_R2| et \verb|R2_to_C| qui sont légèrement différentes des précédentes. Cette petite différence va nous être bien utile par la suite.
+
+
+\end{document}
