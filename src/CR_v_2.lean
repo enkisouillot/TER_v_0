@@ -1,5 +1,6 @@
 import analysis.complex.basic -- pour travailler sur ℂ
 import analysis.calculus.deriv -- pour utiliser la dérivation déjà créée de façon générale
+import data.matrix.notation
 
 noncomputable theory -- pour ne pas avoir de problèmes sur les définitions
 
@@ -115,12 +116,37 @@ def mul_exe (z : ℂ) : (ℝ × ℝ →L[ℝ] ℝ × ℝ) := by {
 #check fin_two_arrow_equiv 
 #check matrix.to_lin'
 
+-- Voici la définition d'une matrice de multiplication
+
 def mulmatrix (a b : ℝ) : matrix (fin 2) (fin 2) ℝ :=
-![![a,  b],
-  ![-b, a]]
+![![a,  -b],
+  ![b,  a]]
 
+variable (f' : ℂ)
 
-lemma toto (f' : ℂ) : matrix.to_lin' (mulmatrix (f'.1 ) (f'.2)) = C_to_R2 ∘L real_multiply f' ∘L R2_to_C :=
+#check fin_two_arrow_equiv ℝ
+#check (mulmatrix f'.re f'.im 0) -- je ne comprends pas le zéro
+#check matrix.vec_head
+
+lemma cauchy_riemann_step_2 (f' : ℂ) : (fin_two_arrow_equiv ℝ) ∘ matrix.to_lin' (mulmatrix (f'.1 ) (f'.2)) ∘ (fin_two_arrow_equiv ℝ).symm = C_to_R2 ∘L real_multiply f' ∘L R2_to_C :=
 begin
-  sorry
+  funext, -- deux fonctions sont les mêmes si elles sont les mêmes sur tout élément de l'ensemble
+  simp [C_to_R2, R2_to_C],
+  simp [mulmatrix],
+  simp [real_multiply],
+  simp [multiply],
+  split ; ring,
+end
+
+-- pourquoi simplifier matrix.mul_vec et matrix.vec2_dot_product' ?
+
+lemma toto (f' : ℂ) :
+  (fin_two_arrow_equiv _) ∘ matrix.to_lin' (mulmatrix (f'.1 ) (f'.2)) ∘
+    (fin_two_arrow_equiv _).symm =
+  C_to_R2 ∘L real_multiply f' ∘L R2_to_C :=
+begin
+  funext,
+  simp [C_to_R2, R2_to_C, mulmatrix, real_multiply, multiply, matrix.mul_vec,
+    matrix.vec2_dot_product'],
+  split; ring,
 end
