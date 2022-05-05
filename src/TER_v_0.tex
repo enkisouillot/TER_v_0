@@ -312,6 +312,8 @@ boxed title style={frame code={
 
 \ClearShipoutPicture
 
+\tableofcontents
+
 
 \section{Introduction}
 
@@ -805,7 +807,7 @@ Pour cette preuve, il a nécessité un grand nombre de lemmes intermédiaires lo
 
 Nous ne l'avons pas fait ici car, en tentant la preuve de notre \verb|cauchy_riemann_step_1|, nous nous sommes aperçu que cette définition de multiplication n'est pas la plus simple à manipuler. Nous l'avons donc laisser de côté, ou plutôt, nous avons adapté nos énoncés.
 
-	\subsection{Les bons énoncés}
+	\subsection{Un simple changement}
 	
 	Pour commencer et afin de simplifier l'utilisation, re-définissons les fonctions de $\C$ dans $\R^2$ :
 	
@@ -825,6 +827,122 @@ Re-définissons maintenant le \verb|realify| avec ces fonctions.
 \end{lstlisting}
 
 Au final, nous avons donné la même définition à \verb|realify|, à la différence près des petites fonctions \verb|C_to_R2| et \verb|R2_to_C| qui sont légèrement différentes des précédentes. Cette petite différence va nous être bien utile par la suite.
+
+On peut d'ailleurs voir que la définition de la multiplication du paragraphe précédent est maintenant beaucoup plus aisée avec ces deux fonctions \verb|C_to_R2| et \verb|R2_to_C|.
+
+\begin{code}{La multiplication par un complexe dans $\R^2$ est $\R-$linéaire et continue}
+\begin{lstlisting}
+def mul_exe (z : ℂ) : (ℝ × ℝ →L[ℝ] ℝ × ℝ) := by {
+  refine ⟨_,_⟩, -- on recommence les refine, comme avant
+  { refine ⟨_,_,_⟩,
+    -- on veut la multiplication par z, mais de ℝ² dans ℝ²
+    { exact realify (λ w, w * z) }, 
+    -- LEAN prouve l'additivité avec la tactique ring
+    { intros, simp [realify], ring}, 
+    -- on continue avec l'homogénéité, encore une fois avec ring,
+    { intros, simp[realify, C_to_R2], split ; ring }, 
+  },
+  -- on simplifie et on applique la règle de continuité sur la composition
+  simp [realify], apply continuous.comp,
+  -- C_to_R2 est continue
+  { exact C_to_R2.continuous },
+  -- encore la continuité de la composition
+  apply continuous.comp,
+  -- la multiplication à droite est continue
+  { exact continuous_mul_right z },
+  -- R2_to_C est continue
+  { exact R2_to_C.continuous },
+}
+\end{lstlisting}
+\end{code}
+
+En revanche, ce n'est toujours pas cette multiplication que nous allons utiliser car elle ne permet pas de conclure sur notre énoncé \verb|cauchy_riemann_step_1|.
+
+\medskip
+
+Nous allons plutôt utiliser la multiplication par un complexe comme une application de $\C$ dans $\C$ qui serait continue et $\R-$linéaire. Pour cela, définissons un premier élément : la multiplication par un complexe de $\C$ dans $\C$ est $\C-$linéaire et continue. Le code est sensiblement le même que celui ci-dessus :
+
+\begin{code}{La multiplication par un complexe dans $\C$ est $\C-$linéaire et continue}
+\begin{lstlisting}
+def multiplication (w : ℂ) : ℂ →L[ℂ] ℂ :=
+begin
+  refine ⟨_,_⟩, -- on demande a LEAN de generer les objectifs de la definition
+  {
+    refine ⟨_,_,_⟩, -- encore une fois
+    exact λ z, w * z, -- LEAN veut une application de ℂ dans ℂ, on lui donne la multiplication par w ∈ ℂ
+    exact mul_add w, -- on trouve ensuite la propriete de linearite (on utilise notamment library_search)
+    intros, simp, ring, -- on termine avec des tactiques simples
+  },
+  simp, -- on demande à LEAN de simplifier pour y voir clair
+  exact continuous_mul_left w, -- encore un library_search pour trouver la propriete dans mathlib
+end 
+\end{lstlisting}
+\end{code}
+
+On notera que certaines étapes se résolvent de façon beaucoup plus simple, avec l'aide de la librairie et de la tactique \verb|library_search|. 
+
+\medskip
+
+Le code ci-dessus représente la méthode de recherche des preuves. Dans la librairie notamment, les résultats ne sont pas présentés ainsi, mais en version raccourcie. Ici, nous pouvons raccourcir la preuve en utilisant les symboles $\langle\,\rangle$ comme ceux utilisés avec \verb|refine|. Plus précisément, on va remplacer les \verb|_| utilisés avec \verb|refine| par les éléments de preuve correspondants :
+
+\begin{code}{La définition précédente --- en version condensée}
+\begin{lstlisting}
+def multiply (w : ℂ) :  ℂ →L[ℂ] ℂ :=
+⟨⟨λ z, w * z, mul_add w, by { intros, simp, ring }⟩, continuous_mul_left w⟩
+\end{lstlisting}
+\end{code}
+
+La suite consiste à prouver que cette multiplication est également $\R-$linéaire, ou plutôt de définir une multiplication de $\C$ dans $\C$ qui est $\R-$linéaire à partir de \verb|multiply|. Pour cela, nous allons utiliser une propriété qui implique la continuité et la linéarité sur le corps des scalaires à partir de celles sur l'espace vectoriel, qui s'appelle \verb|continuous_linear_map.restrict_scalars|. Autrement dit, on écrit :
+
+\begin{code}{La multiplication restreinte au corps des scalaires}
+\begin{lstlisting}
+def real_multiply (f' : ℂ) : ℂ →L[ℝ] ℂ :=
+continuous_linear_map.restrict_scalars ℝ (multiply f')
+\end{lstlisting}
+\end{code}
+
+\bigskip
+
+Nous allons maintenant pouvoir revenir à notre \verb|cauchy_riemann_step_1|. Mais, avant de le prouver, nous allons devoir adapter l'énoncé avec les nouvelles définitions que nous avons prises. En effet, l'argument de dérivée que nous avions était simplement \verb|multiply f'| qui devait être une application de $\R^2$ dans $\R^2$, $\R-$linéaire et continue. Ici, nous n'avons plus qu'une multiplication dans $\C$ qui est $\R-$linéaire et continue.
+
+Nous allons donc devoir transformer cette application. À première vue, nous pourrions simplement appliquer \verb|realify| à notre fonction. Or, la définition de \verb|realify| n'assure pas la continuité de la composition de fonctions, même si celle-ci est vraie. Nous allons donc composer manuellement et de façon continue et linéaire, avec comme raccourci l'écriture $\circ L$ :
+
+\begin{code}{Nouvel énoncé pour 3.B}
+\begin{lstlisting}
+lemma cauchy_riemann_step_1 {f : ℂ → ℂ} {z : ℂ} (f' : ℂ) (hf : has_deriv_at f f' z) : 
+  has_fderiv_at (realify f) (C_to_R2 ∘L real_multiply f' ∘L R2_to_C) (C_to_R2 z) := 
+\end{lstlisting}
+\end{code}
+
+Il nous reste alors la preuve, qui se déroule de façon conventionnelle, avec pour principal outil le théorème \verb|has_fderiv_at.comp| qui n'est rien d'autre que le théorème de dérivation en chaîne. Voici la preuve :
+
+\begin{code}{Preuve de la première étape de Cauchy-Riemann}
+\begin{lstlisting}
+lemma cauchy_riemann_step_1 {f : ℂ → ℂ} {z : ℂ} (f' : ℂ) (hf : has_deriv_at f f' z) : 
+  has_fderiv_at (realify f) (C_to_R2 ∘L real_multiply f' ∘L R2_to_C) (C_to_R2 z) := 
+begin
+  -- On donne la preuve que R2_to_C est l'inverse à gauche de C_to_R2
+  have zz : function.left_inverse R2_to_C C_to_R2 := complex.equiv_real_prod.left_inv,
+  -- on applique la règle de dérivation en chaîne
+  apply has_fderiv_at.comp,
+  -- la preuve que C_to_R2 soit différentiable de différentielle elle-même est :
+  { apply C_to_R2.has_fderiv_at},
+  -- on applique encore une fois la règle de la chaîne
+  {apply has_fderiv_at.comp,
+  -- on demande à LEAN de comparer l'hypohtèse hf restreinte à ℝ avec le goal
+  -- LEAN donne alors à prouver les différences
+  { convert has_fderiv_at.restrict_scalars ℝ hf.has_fderiv_at,
+    -- on simplifie le goal : on développe real_multiply, puis multiply
+    { simp [real_multiply, multiply, continuous_linear_map.restrict_scalars],
+      -- deux applications sont égales si elles sont égales en tout point
+      apply linear_map.ext, intro x, simp, apply mul_comm
+    }, -- il reste maintenant à appliquer l'hypothèse zz que nous avions montrée
+    { apply zz},},
+  -- et voici la preuve que R2_to_C est différentiable de différentielle elle-même
+  {apply R2_to_C.has_fderiv_at, }, },
+end
+\end{lstlisting}
+\end{code}
 
 
 \end{document}
