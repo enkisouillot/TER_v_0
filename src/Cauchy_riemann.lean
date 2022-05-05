@@ -76,7 +76,6 @@ begin
 end
 
 
-
 def multiplication (z : ℂ) : (ℝ × ℝ →L[ℝ] ℝ × ℝ) := by {
   refine ⟨_,_⟩,
   { refine ⟨_,_,_⟩,

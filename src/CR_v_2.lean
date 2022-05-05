@@ -79,15 +79,14 @@ begin
     { apply zz},},
   -- et voici la preuve que R2_to_C est différentiable de différentielle elle-même
   {apply R2_to_C.has_fderiv_at, }, },
-  -- refine C_to_R2.has_fderiv_at.comp _ (has_fderiv_at.comp _ _ R2_to_C.has_fderiv_at),
 end
 
 /-
 Il reste alors à rendre cette preuve plus courte avec une écriture condensée
 -/
 
-lemma cauchy_riemann_step_1 {f : ℂ → ℂ} {z : ℂ} (f' : ℂ) (hf : has_deriv_at f f' z) : -- les variables et les hypothèses
-  has_fderiv_at (realify f) (C_to_R2 ∘L real_multiply f' ∘L R2_to_C) (C_to_R2 z) := -- l'énoncé
+lemma cauchy_riemann_step_1 {f : ℂ → ℂ} {z : ℂ} (f' : ℂ) (hf : has_deriv_at f f' z) : 
+  has_fderiv_at (realify f) (C_to_R2 ∘L real_multiply f' ∘L R2_to_C) (C_to_R2 z) := 
 begin
   refine C_to_R2.has_fderiv_at.comp _ (has_fderiv_at.comp _ _ R2_to_C.has_fderiv_at),
   have zz : function.left_inverse R2_to_C C_to_R2 := complex.equiv_real_prod.left_inv, 
@@ -100,16 +99,24 @@ end
 -- je teste l'ancienne version de la multiplication, avec la nouvelle définition de realify
 
 def mul_exe (z : ℂ) : (ℝ × ℝ →L[ℝ] ℝ × ℝ) := by {
-  refine ⟨_,_⟩,
+  refine ⟨_,_⟩, -- on recommence les refine, comme avant
   { refine ⟨_,_,_⟩,
-    { exact realify (λ w, w * z) },
-    { intros, simp [realify], ring_nf},
-    { intros r x, simp[realify, C_to_R2], split ; ring },
+    -- on veut la multiplication par z, mais de ℝ² dans ℝ²
+    { exact realify (λ w, w * z) }, 
+    -- LEAN prouve l'additivité avec la tactique ring
+    { intros, simp [realify], ring}, 
+    -- on continue avec l'homogénéité, encore une fois avec ring,
+    { intros, simp[realify, C_to_R2], split ; ring }, 
   },
+  -- on simplifie et on applique la règle de continuité sur la composition
   simp [realify], apply continuous.comp,
+  -- C_to_R2 est continue
   { exact C_to_R2.continuous },
+  -- encore la continuité de la composition
   apply continuous.comp,
+  -- la multiplication à droite est continue
   { exact continuous_mul_right z },
+  -- R2_to_C est continue
   { exact R2_to_C.continuous },
 }
 
@@ -128,7 +135,9 @@ variable (f' : ℂ)
 #check (mulmatrix f'.re f'.im 0) -- je ne comprends pas le zéro
 #check matrix.vec_head
 
-lemma cauchy_riemann_step_2 (f' : ℂ) : (fin_two_arrow_equiv ℝ) ∘ matrix.to_lin' (mulmatrix (f'.1 ) (f'.2)) ∘ (fin_two_arrow_equiv ℝ).symm = C_to_R2 ∘L real_multiply f' ∘L R2_to_C :=
+lemma cauchy_riemann_step_2 (f' : ℂ) : 
+  (fin_two_arrow_equiv ℝ) ∘ matrix.to_lin' (mulmatrix (f'.1 ) (f'.2)) ∘ (fin_two_arrow_equiv ℝ).symm 
+    = C_to_R2 ∘L real_multiply f' ∘L R2_to_C :=
 begin
   funext, -- deux fonctions sont les mêmes si elles sont les mêmes sur tout élément de l'ensemble
   simp [C_to_R2, R2_to_C],
