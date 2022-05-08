@@ -80,7 +80,7 @@ def multiplication (z : ℂ) : (ℝ × ℝ →L[ℝ] ℝ × ℝ) := by {
   refine ⟨_,_⟩,
   { refine ⟨_,_,_⟩,
     { exact realify (λ w, z * w) },
-    { intros, simp [realify], split, ring, ring },
+    { intros, simp [realifya], split, ring, ring },
     { intros, simp [realify], split; ring } },
   { simp, 
     suffices : lipschitz_with (nnnorm z * 2) (realify (has_mul.mul z)),

@@ -57,8 +57,10 @@ continuous_linear_map.restrict_scalars ℝ (multiply f')
   Voici l'énoncé LEAN :
 -/
 
+def realifyₗ (f : ℂ →L[ℝ] ℂ) : ℝ × ℝ →L[ℝ] ℝ × ℝ := C_to_R2 ∘L f ∘L R2_to_C
+
 example {f : ℂ → ℂ} {z : ℂ} (f' : ℂ) (hf : has_deriv_at f f' z) :
-  has_fderiv_at (realify f) (C_to_R2 ∘L real_multiply f' ∘L R2_to_C) (C_to_R2 z) :=
+  has_fderiv_at (realify f) (realifyₗ (real_multiply f')) (C_to_R2 z) :=
 begin
   -- On donne la preuve que R2_to_C est l'inverse à gauche de C_to_R2
   have zz : function.left_inverse R2_to_C C_to_R2 := complex.equiv_real_prod.left_inv,
@@ -120,8 +122,14 @@ def mul_exe (z : ℂ) : (ℝ × ℝ →L[ℝ] ℝ × ℝ) := by {
   { exact R2_to_C.continuous },
 }
 
-#check fin_two_arrow_equiv 
-#check matrix.to_lin'
+/-
+La deuxième étape de notre développement est de considérer les matrices et notamment la matrice
+de notre application de multiplication
+On souhaite en effet exprimer des relations entre les dérivées partielles
+que l'on peut voir comme étant les coefficients de la matrice de f' dans la base canonique
+Si l'on prouve que la matrice est bel et bien de la forme d'une matrice de multiplication
+on aura directement les relations souhaitée
+-/
 
 -- Voici la définition d'une matrice de multiplication
 
@@ -129,33 +137,26 @@ def mulmatrix (a b : ℝ) : matrix (fin 2) (fin 2) ℝ :=
 ![![a,  -b],
   ![b,  a]]
 
-variable (f' : ℂ)
-
-#check fin_two_arrow_equiv ℝ
-#check (mulmatrix f'.re f'.im 0) -- je ne comprends pas le zéro
-#check matrix.vec_head
+/-
+Et voici l'énoncé disant que l'application
+-/
 
 lemma cauchy_riemann_step_2 (f' : ℂ) : 
-  (fin_two_arrow_equiv ℝ) ∘ matrix.to_lin' (mulmatrix (f'.1 ) (f'.2)) ∘ (fin_two_arrow_equiv ℝ).symm 
-    = C_to_R2 ∘L real_multiply f' ∘L R2_to_C :=
+  (fin_two_arrow_equiv ℝ) ∘ matrix.to_lin' (mulmatrix (f'.re) (f'.im)) ∘ (fin_two_arrow_equiv ℝ).symm 
+    = realifyₗ (real_multiply f') :=
 begin
   funext, -- deux fonctions sont les mêmes si elles sont les mêmes sur tout élément de l'ensemble
-  simp [C_to_R2, R2_to_C],
+  simp [realifyₗ, C_to_R2, R2_to_C],
   simp [mulmatrix],
   simp [real_multiply],
   simp [multiply],
   split ; ring,
 end
 
--- pourquoi simplifier matrix.mul_vec et matrix.vec2_dot_product' ?
 
-lemma toto (f' : ℂ) :
-  (fin_two_arrow_equiv _) ∘ matrix.to_lin' (mulmatrix (f'.1 ) (f'.2)) ∘
-    (fin_two_arrow_equiv _).symm =
-  C_to_R2 ∘L real_multiply f' ∘L R2_to_C :=
-begin
-  funext,
-  simp [C_to_R2, R2_to_C, mulmatrix, real_multiply, multiply, matrix.mul_vec,
-    matrix.vec2_dot_product'],
-  split; ring,
-end
+def matrix_diff (f : ℂ → ℂ) (f' : ℂ) (z : ℂ) (h : has_deriv_at f f' z) : matrix (fin 2) (fin 2) ℝ := 
+  (fin_two_arrow_equiv ℝ).symm ∘ C_to_R2 ∘ real_multiply f' ∘ R2_to_C ∘ (fin_two_arrow_equiv ℝ).to_fun
+
+#check linear_map.to_matrix'
+#check (fin_two_arrow_equiv ℝ)
+#check (fin_two_arrow_equiv ℝ).symm

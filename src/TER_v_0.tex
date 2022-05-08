@@ -53,17 +53,17 @@ numbers = left, stepnumber=1, numberstyle=\tiny, numbersep=10pt }
 \patchcmd{\chapter}{\thispagestyle{plain}}{\thispagestyle{fancy}}{}{}
 
 \usepackage{titletoc}
-\titlecontents{chapter}
-              [0pc]
-              {\addvspace{.2pc}\filright}
-              {$\leadsto$~\chaptername~ \thecontentslabel ~--- 
-               }
-              {}
-              {\titlerule*[1pc]{.}\contentspage}  % That is, without page number
-              [\addvspace{.2pc}]
-              
-\titlecontents{section}[4pc]{\addvspace{.2pc}\filright}{\thecontentslabel ~--- }{}{\titlerule*[1pc]{.}\contentspage}[\addvspace{.2pc}]
-\titlecontents{subsection}[7pc]{\addvspace{.2pc}\filright}{\thecontentslabel ~--- }{}{\titlerule*[1pc]{.}\contentspage}[\addvspace{.2pc}]
+%\titlecontents{chapter}
+%              [0pc]
+%              {\addvspace{.2pc}\filright}
+%              {$\leadsto$~\chaptername~ \thecontentslabel ~--- 
+%               }
+%              {}
+%              {\titlerule*[1pc]{.}\contentspage}  % That is, without page number
+%              [\addvspace{.2pc}]
+%              
+%\titlecontents{section}[4pc]{\addvspace{.2pc}\filright}{\thecontentslabel ~--- }{}{\titlerule*[1pc]{.}\contentspage}[\addvspace{.2pc}]
+%\titlecontents{subsection}[7pc]{\addvspace{.2pc}\filright}{\thecontentslabel ~--- }{}{\titlerule*[1pc]{.}\contentspage}[\addvspace{.2pc}]
 
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 \newcommand{\blap}[1]{\vbox to 0pt{#1\vss}}
@@ -626,15 +626,14 @@ On a ensuite une hypothèse de départ : $f$ est $\C-$dérivable en $z$ de déri
 	
 \begin{lstlisting}
 	lemma cauchy_riemann_step_1 {f : ℂ → ℂ} {z : ℂ} (f' : ℂ) (hf : has_deriv_at f f' z) : 
-	
-	has_fderiv_at (realify f) (multiply f') (complex.equiv_real_prod z) :=	 
+	has_fderiv_at (realify f) (multiply f') (complex.equiv_real_prod z) :=
 \end{lstlisting}
 	
 	Sous réserve de définir \verb|realify| et \verb|multiply|, cet énoncé tient la route.
 	
 	On notera d'ailleurs la syntaxe de la commande \verb|lemma| : en premier le nom que l'on donne afin d'y faire référence plus tard. Ensuite, entre parenthèse ou accolades, les variables et les hypothèses, puis \verb|:|, l'énoncé et on termine par \verb|:=|.
 	
-	\subsection{Un premier essai...}
+\subsection{Un premier essai}
 	
 Nous avons tout d'abord défini \verb|realify f| comme étant la composition de $f$ avec les fonctions qui vont de $\C$ dans $\R^2$ et réciproquement. Avec la fonction $f$ en argument, nous obtenons le code suivant :
 
@@ -905,12 +904,18 @@ continuous_linear_map.restrict_scalars ℝ (multiply f')
 
 Nous allons maintenant pouvoir revenir à notre \verb|cauchy_riemann_step_1|. Mais, avant de le prouver, nous allons devoir adapter l'énoncé avec les nouvelles définitions que nous avons prises. En effet, l'argument de dérivée que nous avions était simplement \verb|multiply f'| qui devait être une application de $\R^2$ dans $\R^2$, $\R-$linéaire et continue. Ici, nous n'avons plus qu'une multiplication dans $\C$ qui est $\R-$linéaire et continue.
 
-Nous allons donc devoir transformer cette application. À première vue, nous pourrions simplement appliquer \verb|realify| à notre fonction. Or, la définition de \verb|realify| n'assure pas la continuité de la composition de fonctions, même si celle-ci est vraie. Nous allons donc composer manuellement et de façon continue et linéaire, avec comme raccourci l'écriture $\circ L$ :
+Nous allons donc devoir transformer cette application. À première vue, nous pourrions simplement appliquer \verb|realify| à notre fonction. Or, la définition de \verb|realify| n'assure pas la continuité de la composition de fonctions, même si celle-ci est vraie. Nous allons donc définir une version linéaire et continue de \verb|realify| :
+
+\begin{lstlisting}
+def realifyₗ (f : ℂ →L[ℝ] ℂ) : ℝ × ℝ →L[ℝ] ℝ × ℝ := C_to_R2 ∘L f ∘L R2_to_C
+\end{lstlisting}
+
+et enfin donner notre énoncé :
 
 \begin{code}{Nouvel énoncé pour 3.B}
 \begin{lstlisting}
 lemma cauchy_riemann_step_1 {f : ℂ → ℂ} {z : ℂ} (f' : ℂ) (hf : has_deriv_at f f' z) : 
-  has_fderiv_at (realify f) (C_to_R2 ∘L real_multiply f' ∘L R2_to_C) (C_to_R2 z) := 
+  has_fderiv_at (realify f) (realifyₗ (real_multiply f')) (C_to_R2 z) := 
 \end{lstlisting}
 \end{code}
 
@@ -919,7 +924,7 @@ Il nous reste alors la preuve, qui se déroule de façon conventionnelle, avec p
 \begin{code}{Preuve de la première étape de Cauchy-Riemann}
 \begin{lstlisting}
 lemma cauchy_riemann_step_1 {f : ℂ → ℂ} {z : ℂ} (f' : ℂ) (hf : has_deriv_at f f' z) : 
-  has_fderiv_at (realify f) (C_to_R2 ∘L real_multiply f' ∘L R2_to_C) (C_to_R2 z) := 
+  has_fderiv_at (realify f) (realifyₗ (real_multiply f')) (C_to_R2 z) := 
 begin
   -- On donne la preuve que R2_to_C est l'inverse à gauche de C_to_R2
   have zz : function.left_inverse R2_to_C C_to_R2 := complex.equiv_real_prod.left_inv,
@@ -943,6 +948,80 @@ begin
 end
 \end{lstlisting}
 \end{code}
+
+Enfin, la dernière étape, qui n'est pas obligatoire, mais qui correspond au travail mené pour la librairie, est de rendre la preuve plus courte. Elle sera uniquement plus courte en nombre de lignes, car le contenu et la méthode seront les mêmes. Voici ce que l'on obtient :
+
+\begin{code}{Preuve précédente --- version condensée}
+\begin{lstlisting}
+lemma cauchy_riemann_step_1 {f : ℂ → ℂ} {z : ℂ} (f' : ℂ) (hf : has_deriv_at f f' z) : 
+  has_fderiv_at (realify f) (realifyₗ (real_multiply f')) (C_to_R2 z) := 
+begin
+  refine C_to_R2.has_fderiv_at.comp _ (has_fderiv_at.comp _ _ R2_to_C.has_fderiv_at),
+  have zz : function.left_inverse R2_to_C C_to_R2 := complex.equiv_real_prod.left_inv, 
+  rw zz z,
+  convert has_fderiv_at.restrict_scalars ℝ hf.has_fderiv_at,
+  simp [real_multiply, multiply, continuous_linear_map.restrict_scalars],
+  apply linear_map.ext, intro z, simp, apply mul_comm,
+end
+\end{lstlisting}
+\end{code}
+
+\subsection{Cauchy-Riemann step 2}
+
+L'objectif est d'exprimer clairement les relations de Cauchy-Riemann avec les dérivées partielles. Pour cela, nous allons devoir parler de la matrice de la notre application de multiplication. 
+
+\medskip
+
+Commençons par définir la forme générale d'une matrice de multiplication.
+Pour définir une matrice, on définit un objet mathématique du type \verb|matrix|. On doit donner aussi la taille. Pour cela, on va utiliser les types de la forme \verb|fin n| : c'est le sous-type de $\N$ composé des entiers strictement inférieurs à $n$. Comme on travaille sur $\R^2$, on veut des matrices de tailles $2\times 2$ à coefficients dans $\R$. Ensuite, pour définir une matrice, la syntaxe est sensiblement la même que la plupart des langages de programmation. Voici la définition :
+
+\begin{code}{Matrice de multiplication}
+\begin{lstlisting}
+def mulmatrix (a b : ℝ) : matrix (fin 2) (fin 2) ℝ :=
+![![a,  -b],
+  ![b,  a]]
+\end{lstlisting}
+\end{code}
+
+Nous allons donc discuter de la matrice de la multiplication par $f'$, c'est-à-dire la matrice avec partie réelle et imaginaire de $f'$ :
+\[F = \begin{bmatrix}
+Re(f') & -Im(f') \\ Im(f') & Re(f')
+\end{bmatrix}\]
+
+Cette matrice correspond donc, d'après notre définition, à \verb|mulmatrix (f'.re) (f'.im)|. On veut donc montrer que notre application \verb|real_multiply f'| dans sa version réalifiée, s'exprime par la matrice $F$ ci-dessus. Pour cela, on va plutôt montrer que l'application linéaire qui vient de la matrice $F$ est la même que \verb|real_multiply f'|.
+
+\medskip
+
+Les outils dont nous auront besoin sont les suivants :
+\begin{itemize}
+	\item \verb|matrix.to_lin'| est un lemme qui donne l'équivalence entre une matrice et une application linéaire. Ainsi, \verb|matrix.to_lin' (mulmatrix (f'.re ) (f'.im))| est une application linéaire de $(fin\, 2\rightarrow \R)$ dans $(fin\, 2\rightarrow \R)$.
+	\item \verb|fin_two_arrow_equiv| qui est l'équivalence entre le type $(fin\, 2\to \alpha)$ et $\alpha\times\alpha$. \\
+	Alors, \verb|fin_two_arrow_equiv| $\R$ est l'équivalence entre $(fin\,2\to\R)$ et $\R\times \R$.
+\end{itemize}
+
+Nous voulons donc prouver cet énoncé :
+
+\begin{lstlisting}
+lemma cauchy_riemann_step_2 (f' : ℂ) : 
+  (fin_two_arrow_equiv ℝ) ∘ matrix.to_lin' (mulmatrix (f'.re) (f'.im)) ∘ (fin_two_arrow_equiv ℝ).symm 
+    = realifyₗ (real_multiply f') :=
+\end{lstlisting}
+
+La preuve est finalement assez simple, elle parait même être triviale. Du côté de \LEAN, nous utilisons tout d'abord le fait que nos deux fonctions sont égales si elles sont égales sur tout élément de $\R\times\R$, puis plusieurs simplifications successives et enfin une résolution évidente avec \verb|ring|. Voici la preuve :
+
+\begin{code}{Preuve Cauchy-Riemann step 2}
+\begin{lstlisting}
+lemma cauchy_riemann_step_2 (f' : ℂ) : 
+  (fin_two_arrow_equiv ℝ) ∘ matrix.to_lin' (mulmatrix (f'.re) (f'.im)) ∘ (fin_two_arrow_equiv ℝ).symm 
+    = realifyₗ (real_multiply f') :=
+begin
+  funext, -- deux fonctions sont les mêmes si elles sont les mêmes sur tout élément de l'ensemble
+  simp [realifyₗ, C_to_R2, R2_to_C, mulmatrix, real_multiply, multiply],
+  split ; ring,
+end
+\end{lstlisting}
+\end{code}
+
 
 
 \end{document}
