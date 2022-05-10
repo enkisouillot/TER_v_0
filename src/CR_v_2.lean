@@ -163,7 +163,8 @@ def lin_map_diff (f' : ℂ) : (fin 2 → ℝ) →ₗ[ℝ] (fin 2 → ℝ) := lin
 def matrix_diff (f' : ℂ) : matrix (fin 2) (fin 2) ℝ := 
   linear_map.to_matrix' (lin_map_diff f')
 
-def partial_deriv : sorry := sorry
+def partial_deriv_x (f : ℂ → ℂ) (z : ℂ) (f' : ℂ) (hf : has_deriv_at f f' z) :
+ ℂ := R2_to_C (lin_matrix ((matrix_diff f' 0)))
 
 #check linear_map.to_matrix'
 #check (fin_two_arrow_equiv ℝ)
