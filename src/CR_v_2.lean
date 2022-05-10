@@ -153,10 +153,19 @@ begin
   split ; ring,
 end
 
+def C_to_R2_lin : ℂ →ₗ[ℝ] ℝ × ℝ := C_to_R2
+def R2_to_C_lin : ℝ × ℝ →ₗ[ℝ] ℂ := R2_to_C
+def real_multiply_lin (f' : ℂ) : ℂ →ₗ[ℝ] ℂ := real_multiply f'
+def lin_matrix : (fin 2 → ℝ) →ₗ[ℝ] ℝ × ℝ := linear_equiv.fin_two_arrow ℝ ℝ
+def lin_matrix_symm : ℝ × ℝ →ₗ[ℝ] (fin 2 → ℝ) := (linear_equiv.fin_two_arrow ℝ ℝ).symm
+def lin_map_diff (f' : ℂ) : (fin 2 → ℝ) →ₗ[ℝ] (fin 2 → ℝ) := lin_matrix_symm ∘ₗ C_to_R2_lin ∘ₗ (real_multiply_lin f') ∘ₗ R2_to_C_lin ∘ₗ lin_matrix
 
-def matrix_diff (f : ℂ → ℂ) (f' : ℂ) (z : ℂ) (h : has_deriv_at f f' z) : matrix (fin 2) (fin 2) ℝ := 
-  (fin_two_arrow_equiv ℝ).symm ∘ C_to_R2 ∘ real_multiply f' ∘ R2_to_C ∘ (fin_two_arrow_equiv ℝ).to_fun
+def matrix_diff (f' : ℂ) : matrix (fin 2) (fin 2) ℝ := 
+  linear_map.to_matrix' (lin_map_diff f')
+
+def partial_deriv : sorry := sorry
 
 #check linear_map.to_matrix'
 #check (fin_two_arrow_equiv ℝ)
 #check (fin_two_arrow_equiv ℝ).symm
+#check linear_equiv.fin_two_arrow ℝ ℝ 
