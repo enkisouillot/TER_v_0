@@ -179,7 +179,7 @@ end
 def partial_deriv_re (f' : ℂ) : fin 2 → ℝ := matrix_diff f' 0
 def partial_deriv_im (f' : ℂ) : fin 2 → ℝ := matrix_diff f' 1
 
-lemma cauchy_riemann_step_3 (f : ℂ → ℂ) (f' : ℂ) (z : ℂ) (hf : has_deriv_at f f' z) :
+lemma cauchy_riemann_step_3 (f' : ℂ) :
 (partial_deriv_re f' 0) = (partial_deriv_im f' 1) ∧ (partial_deriv_re f' 1) = -(partial_deriv_im f' 0) :=
 begin
 sorry
