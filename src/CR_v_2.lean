@@ -163,10 +163,24 @@ def lin_map_diff (f' : ℂ) : (fin 2 → ℝ) →ₗ[ℝ] (fin 2 → ℝ) := lin
 def matrix_diff (f' : ℂ) : matrix (fin 2) (fin 2) ℝ := 
   linear_map.to_matrix' (lin_map_diff f')
 
-def partial_deriv_x (f : ℂ → ℂ) (z : ℂ) (f' : ℂ) (hf : has_deriv_at f f' z) :
- ℂ := R2_to_C (lin_matrix ((matrix_diff f' 0)))
+example (f : ℂ → ℂ) (f' : ℂ) (z : ℂ) (hf : has_deriv_at f f' z) : 
+  mulmatrix (f'.re) (f'.im) = matrix_diff f' :=
+begin
+  ext,
+  simp [mulmatrix, matrix_diff, lin_map_diff],
+  simp [lin_matrix_symm, C_to_R2_lin, real_multiply_lin, R2_to_C_lin, lin_matrix],
+  simp [C_to_R2, R2_to_C, real_multiply],
+  simp [multiply],
+sorry
+end
 
-#check linear_map.to_matrix'
-#check (fin_two_arrow_equiv ℝ)
-#check (fin_two_arrow_equiv ℝ).symm
-#check linear_equiv.fin_two_arrow ℝ ℝ 
+-- def partial_deriv_re_x (f : ℂ → ℂ) (f' : ℂ) (z : ℂ) (hf : has_deriv_at f f' z) 
+-- : ℝ := (matrix_diff f' 0 0)
+def partial_deriv_re (f' : ℂ) : fin 2 → ℝ := matrix_diff f' 0
+def partial_deriv_im (f' : ℂ) : fin 2 → ℝ := matrix_diff f' 1
+
+lemma cauchy_riemann_step_3 (f : ℂ → ℂ) (f' : ℂ) (z : ℂ) (hf : has_deriv_at f f' z) :
+(partial_deriv_re f' 0) = (partial_deriv_im f' 1) ∧ (partial_deriv_re f' 1) = -(partial_deriv_im f' 0) :=
+begin
+sorry
+end
