@@ -166,11 +166,7 @@ def matrix_diff (f' : ℂ) : matrix (fin 2) (fin 2) ℝ :=
 example (f : ℂ → ℂ) (f' : ℂ) (z : ℂ) (hf : has_deriv_at f f' z) : 
   mulmatrix (f'.re) (f'.im) = matrix_diff f' :=
 begin
-  ext,
-  simp [mulmatrix, matrix_diff, lin_map_diff],
-  simp [lin_matrix_symm, C_to_R2_lin, real_multiply_lin, R2_to_C_lin, lin_matrix],
-  simp [C_to_R2, R2_to_C, real_multiply],
-  simp [multiply],
+  have h := cauchy_riemann_step_2 f',
 sorry
 end
 
@@ -182,5 +178,7 @@ def partial_deriv_im (f' : ℂ) : fin 2 → ℝ := matrix_diff f' 1
 lemma cauchy_riemann_step_3 (f' : ℂ) :
 (partial_deriv_re f' 0) = (partial_deriv_im f' 1) ∧ (partial_deriv_re f' 1) = -(partial_deriv_im f' 0) :=
 begin
+  split,
+
 sorry
 end
