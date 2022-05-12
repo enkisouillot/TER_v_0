@@ -161,11 +161,13 @@ def lin_matrix_symm : ℝ × ℝ →ₗ[ℝ] (fin 2 → ℝ) := (linear_equiv.fi
 def linify (f : ℝ × ℝ →ₗ[ℝ] ℝ × ℝ) : (fin 2 → ℝ) →ₗ[ℝ] (fin 2 → ℝ) := 
 lin_matrix_symm ∘ₗ f ∘ₗ lin_matrix
 
--- On définit enfin la matrice de la différentielle
+-- On définit enfin la matrice de la différentielle d'une application f
 
 def matrix_diff (f' : ℂ) : matrix (fin 2) (fin 2) ℝ := 
   linear_map.to_matrix' (linify (continuous_linear_map.simps.coe (realifyₗ (real_multiply f'))))
 
+-- On en arrive aux définitions des dérivées partielles des parties réelles et imaginaires
+-- comme des vecteurs, venant de la matrice de la différentielle
 
 def partial_deriv_re (f' : ℂ) : fin 2 → ℝ := matrix_diff f' 0
 def partial_deriv_im (f' : ℂ) : fin 2 → ℝ := matrix_diff f' 1
