@@ -88,7 +88,7 @@ Il reste alors à rendre cette preuve plus courte avec une écriture condensée
 -/
 
 lemma cauchy_riemann_step_1 {f : ℂ → ℂ} {z : ℂ} (f' : ℂ) (hf : has_deriv_at f f' z) : 
-  has_fderiv_at (realify f) (C_to_R2 ∘L real_multiply f' ∘L R2_to_C) (C_to_R2 z) := 
+  has_fderiv_at (realify f) (realifyₗ (real_multiply f')) (C_to_R2 z) := 
 begin
   refine C_to_R2.has_fderiv_at.comp _ (has_fderiv_at.comp _ _ R2_to_C.has_fderiv_at),
   have zz : function.left_inverse R2_to_C C_to_R2 := complex.equiv_real_prod.left_inv, 
@@ -153,25 +153,20 @@ begin
   split ; ring,
 end
 
-def C_to_R2_lin : ℂ →ₗ[ℝ] ℝ × ℝ := C_to_R2
-def R2_to_C_lin : ℝ × ℝ →ₗ[ℝ] ℂ := R2_to_C
-def real_multiply_lin (f' : ℂ) : ℂ →ₗ[ℝ] ℂ := real_multiply f'
+-- Une fonction dans un sens
 def lin_matrix : (fin 2 → ℝ) →ₗ[ℝ] ℝ × ℝ := linear_equiv.fin_two_arrow ℝ ℝ
+-- celle dans l'autre sens, rien d'autre que la réciproque
 def lin_matrix_symm : ℝ × ℝ →ₗ[ℝ] (fin 2 → ℝ) := (linear_equiv.fin_two_arrow ℝ ℝ).symm
-def lin_map_diff (f' : ℂ) : (fin 2 → ℝ) →ₗ[ℝ] (fin 2 → ℝ) := lin_matrix_symm ∘ₗ C_to_R2_lin ∘ₗ (real_multiply_lin f') ∘ₗ R2_to_C_lin ∘ₗ lin_matrix
+-- la composition des deux en une seule fonction
+def linify (f : ℝ × ℝ →ₗ[ℝ] ℝ × ℝ) : (fin 2 → ℝ) →ₗ[ℝ] (fin 2 → ℝ) := 
+lin_matrix_symm ∘ₗ f ∘ₗ lin_matrix
+
+-- On définit enfin la matrice de la différentielle
 
 def matrix_diff (f' : ℂ) : matrix (fin 2) (fin 2) ℝ := 
-  linear_map.to_matrix' (lin_map_diff f')
+  linear_map.to_matrix' (linify (continuous_linear_map.simps.coe (realifyₗ (real_multiply f'))))
 
-example (f : ℂ → ℂ) (f' : ℂ) (z : ℂ) (hf : has_deriv_at f f' z) : 
-  mulmatrix (f'.re) (f'.im) = matrix_diff f' :=
-begin
-  have h := cauchy_riemann_step_2 f',
-sorry
-end
 
--- def partial_deriv_re_x (f : ℂ → ℂ) (f' : ℂ) (z : ℂ) (hf : has_deriv_at f f' z) 
--- : ℝ := (matrix_diff f' 0 0)
 def partial_deriv_re (f' : ℂ) : fin 2 → ℝ := matrix_diff f' 0
 def partial_deriv_im (f' : ℂ) : fin 2 → ℝ := matrix_diff f' 1
 
@@ -179,6 +174,6 @@ lemma cauchy_riemann_step_3 (f' : ℂ) :
 (partial_deriv_re f' 0) = (partial_deriv_im f' 1) ∧ (partial_deriv_re f' 1) = -(partial_deriv_im f' 0) :=
 begin
   split,
-
-sorry
+  sorry
 end
+
