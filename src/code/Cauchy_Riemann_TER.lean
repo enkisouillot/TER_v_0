@@ -172,6 +172,10 @@ def matrix_diff (f' : ℂ) : matrix (fin 2) (fin 2) ℝ :=
 def partial_deriv_re (f' : ℂ) : fin 2 → ℝ := matrix_diff f' 0
 def partial_deriv_im (f' : ℂ) : fin 2 → ℝ := matrix_diff f' 1
 
+/-
+Et enfin, la preuve des égalités de Cauchy-Riemann, bien connues
+-/
+
 lemma cauchy_riemann_step_3 (f' : ℂ) :
 (partial_deriv_re f' 0) = (partial_deriv_im f' 1) ∧ (partial_deriv_re f' 1) = -(partial_deriv_im f' 0) :=
 begin
@@ -179,4 +183,3 @@ simp [partial_deriv_re, partial_deriv_im, matrix_diff, linify, lin_matrix_symm,
   lin_matrix, realifyₗ, real_multiply, multiply, C_to_R2, R2_to_C,
   continuous_linear_map.comp, linear_map.comp, continuous_linear_map.simps.coe],
 end
-
